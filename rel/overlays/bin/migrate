@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+cd -P -- "$(dirname -- "$0")"
+exec ./residential_tenancy_act eval ResidentialTenancyAct.Release.migrate
