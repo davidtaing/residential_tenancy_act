@@ -57,7 +57,7 @@ config :spark,
 config :residential_tenancy_act,
   ecto_repos: [ResidentialTenancyAct.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [ResidentialTenancyAct.Accounts]
+  ash_domains: [ResidentialTenancyAct.Accounts, ResidentialTenancyAct.Acts]
 
 # Configures the endpoint
 config :residential_tenancy_act, ResidentialTenancyActWeb.Endpoint,
