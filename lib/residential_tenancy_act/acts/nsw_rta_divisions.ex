@@ -22,6 +22,7 @@ defmodule ResidentialTenancyAct.Acts.NSWRTADivisions do
 
     attribute :part_id, :string do
       allow_nil? false
+      primary_key? true
     end
   end
 end
