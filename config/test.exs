@@ -1,4 +1,5 @@
 import Config
+config :residential_tenancy_act, Oban, testing: :manual
 config :residential_tenancy_act, token_signing_secret: "EzgtCrbzoWusfTvyVXP9j61xhO5SZlGh"
 config :bcrypt_elixir, log_rounds: 1
 

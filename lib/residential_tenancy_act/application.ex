@@ -12,6 +12,7 @@ defmodule ResidentialTenancyAct.Application do
       ResidentialTenancyAct.Repo,
       {DNSCluster,
        query: Application.get_env(:residential_tenancy_act, :dns_cluster_query) || :ignore},
+      {Oban, Application.fetch_env!(:residential_tenancy_act, Oban)},
       {Phoenix.PubSub, name: ResidentialTenancyAct.PubSub},
       # Start a worker by calling: ResidentialTenancyAct.Worker.start_link(arg)
       # {ResidentialTenancyAct.Worker, arg},
