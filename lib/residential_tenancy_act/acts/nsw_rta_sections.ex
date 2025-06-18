@@ -10,13 +10,23 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
     repo ResidentialTenancyAct.Repo
   end
 
+  actions do
+    defaults [:create, :read]
+
+    default_accept [:id, :title, :part_id, :division_id, :url]
+
+    update :update do
+      accept [:id, :title, :part_id, :division_id, :url, :text]
+    end
+  end
+
   attributes do
-    attribute :section_id, :string do
+    attribute :id, :string do
       allow_nil? false
       primary_key? true
     end
 
-    attribute :section_title, :string do
+    attribute :title, :string do
       allow_nil? false
     end
 
@@ -29,11 +39,9 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
     end
 
     attribute :text, :string do
-      allow_nil? false
     end
 
     attribute :embeddings, :vector do
-      allow_nil? false
     end
 
     attribute :url, :string do

@@ -10,6 +10,12 @@ defmodule ResidentialTenancyAct.Acts.NSWRTADivisions do
     repo ResidentialTenancyAct.Repo
   end
 
+  actions do
+    defaults [:create, :read]
+
+    default_accept [:id, :title, :part_id]
+  end
+
   attributes do
     attribute :id, :string do
       allow_nil? false

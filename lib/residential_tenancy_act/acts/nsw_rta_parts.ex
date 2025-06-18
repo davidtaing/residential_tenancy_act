@@ -1,4 +1,4 @@
-defmodule ResidentialTenancyAct.Acts.NSWRTAPart do
+defmodule ResidentialTenancyAct.Acts.NSWRTAParts do
   use Ash.Resource,
     domain: ResidentialTenancyAct.Acts,
     data_layer: AshPostgres.DataLayer,
@@ -8,6 +8,12 @@ defmodule ResidentialTenancyAct.Acts.NSWRTAPart do
     schema "rtas"
     table "nsw_rta_parts"
     repo ResidentialTenancyAct.Repo
+  end
+
+  actions do
+    defaults [:create, :read]
+
+    default_accept [:id, :title]
   end
 
   attributes do
