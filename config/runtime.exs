@@ -20,6 +20,10 @@ if System.get_env("PHX_SERVER") do
   config :residential_tenancy_act, ResidentialTenancyActWeb.Endpoint, server: true
 end
 
+if config_env() in [:dev, :test] do
+  Envy.load(["config/.env.#{config_env()}"])
+end
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

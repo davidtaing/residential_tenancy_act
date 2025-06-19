@@ -69,10 +69,14 @@ defmodule ResidentialTenancyAct.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.26"},
-      {:jason, "~> 1.2"},
+      {:jason, "~> 1.4"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:pgvector, "~> 0.3.0"}
+      {:pgvector, "~> 0.3.0"},
+      {:hackney, "~> 1.24.1"},
+      {:ex_aws, "~> 2.5.10"},
+      {:ex_aws_bedrock, "~> 2.5.1"},
+      {:envy, "~> 1.1.1"}
     ]
   end
 

@@ -26,7 +26,18 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
     end
 
     update :update do
-      accept [:id, :title, :part_id, :division_id, :url, :text, :hash, :token_count, :embeddings_stale]
+      accept [
+        :id,
+        :title,
+        :part_id,
+        :division_id,
+        :url,
+        :text,
+        :hash,
+        :token_count,
+        :embeddings_stale,
+        :embeddings
+      ]
     end
   end
 
@@ -73,4 +84,6 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
       default false
     end
   end
+
+  def table_name(), do: "nsw_rta_sections"
 end

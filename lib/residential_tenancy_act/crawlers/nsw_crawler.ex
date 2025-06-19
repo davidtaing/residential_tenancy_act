@@ -44,7 +44,6 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
       |> Enum.map(&get_divisions/1)
       |> List.flatten()
 
-
     divisions
     |> Enum.map(&Map.delete(&1, :content))
     |> Ash.bulk_create!(
@@ -70,7 +69,7 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
 
     section_urls =
       sections
-      |> Enum.map(& %Crawly.Request{url: &1.url})
+      |> Enum.map(&%Crawly.Request{url: &1.url})
 
     %Crawly.ParsedItem{
       items: [],
@@ -127,14 +126,16 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
     |> Floki.parse_fragment!()
     |> Floki.find("b")
     |> Enum.map(fn item ->
-      [division |  division_title_fragments] = Floki.text(item)
+      [division | division_title_fragments] =
+        Floki.text(item)
         |> String.split("-")
-        |> Enum.map(& String.trim(&1))
+        |> Enum.map(&String.trim(&1))
 
       division_title = division_title_fragments |> Enum.join(" - ")
 
       %{
-        id: division
+        id:
+          division
           |> String.replace("Division ", ""),
         title: division_title,
         part_id: part_id
@@ -148,12 +149,13 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
     |> String.split("<a name=\"s")
     |> Enum.drop(1)
     |> Enum.map(fn html_content ->
-      fragment = html_content
-      |> then(&("<a name=\"s" <> &1))
-      |> String.split("\n")
-      |> Enum.at(0)
-      |> String.trim()
-      |> Floki.parse_fragment!()
+      fragment =
+        html_content
+        |> then(&("<a name=\"s" <> &1))
+        |> String.split("\n")
+        |> Enum.at(0)
+        |> String.trim()
+        |> Floki.parse_fragment!()
 
       [section_id, section_title] =
         fragment
@@ -161,12 +163,13 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
         |> String.split(".")
         |> Enum.map(&String.trim/1)
 
-      url = fragment
-      |> Floki.find("a")
-      |> Enum.map(&Floki.attribute(&1, "name"))
-      |> List.flatten()
-      |> hd()
-      |> then(& base_url() <> &1 <> ".html")
+      url =
+        fragment
+        |> Floki.find("a")
+        |> Enum.map(&Floki.attribute(&1, "name"))
+        |> List.flatten()
+        |> hd()
+        |> then(&(base_url() <> &1 <> ".html"))
 
       %{
         id: section_id,
@@ -206,10 +209,13 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
     # Parse the fragment safely
     fragment =
       case Floki.parse_fragment(raw_content) do
-        {:ok, parsed} -> parsed
+        {:ok, parsed} ->
+          parsed
+
         {:error, reason} ->
           IO.puts("Warning: Failed to parse HTML fragment: #{inspect(reason)}")
-          []  # Return empty list as fallback
+          # Return empty list as fallback
+          []
       end
 
     content =
@@ -228,6 +234,7 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
         [] ->
           IO.puts("Warning: Could not find section ID in h3 tags")
           "unknown"
+
         [id | _] ->
           id
           |> String.replace(section_prefix, "")
