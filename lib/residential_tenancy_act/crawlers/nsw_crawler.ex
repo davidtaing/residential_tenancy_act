@@ -33,7 +33,7 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
     parts
     |> Enum.map(&Map.delete(&1, :content))
     |> Ash.bulk_create!(
-      ResidentialTenancyAct.Acts.NSWRTAPart,
+      ResidentialTenancyAct.Acts.NSWRTAParts,
       :create,
       upsert?: true,
       upsert_fields: :replace_all
