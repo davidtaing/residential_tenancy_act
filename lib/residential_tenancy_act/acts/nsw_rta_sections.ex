@@ -85,5 +85,15 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
     end
   end
 
+  relationships do
+    belongs_to :part, ResidentialTenancyAct.Acts.NSWRTAParts do
+      source_attribute :part_id
+    end
+
+    belongs_to :division, ResidentialTenancyAct.Acts.NSWRTADivisions do
+      source_attribute :division_id
+    end
+  end
+
   def table_name(), do: "nsw_rta_sections"
 end

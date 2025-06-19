@@ -22,13 +22,22 @@ defmodule ResidentialTenancyAct.Acts.NSWRTADivisions do
       primary_key? true
     end
 
+    attribute :division_id, :string do
+      allow_nil? true
+    end
+
     attribute :title, :string do
       allow_nil? false
     end
 
     attribute :part_id, :string do
       allow_nil? false
-      primary_key? true
+    end
+  end
+
+  relationships do
+    belongs_to :part, ResidentialTenancyAct.Acts.NSWRTAParts do
+      source_attribute :part_id
     end
   end
 end
