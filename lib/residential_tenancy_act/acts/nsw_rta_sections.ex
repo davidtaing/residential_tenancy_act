@@ -11,12 +11,22 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
   end
 
   actions do
-    defaults [:create, :read]
+    defaults [:create]
 
     default_accept [:id, :title, :part_id, :division_id, :url]
 
+    read :read do
+      primary? true
+
+      pagination do
+        required? false
+        offset? true
+        countable true
+      end
+    end
+
     update :update do
-      accept [:id, :title, :part_id, :division_id, :url, :text]
+      accept [:id, :title, :part_id, :division_id, :url, :text, :hash, :token_count, :embeddings_stale]
     end
   end
 
@@ -39,13 +49,28 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
     end
 
     attribute :text, :string do
+      allow_nil? true
     end
 
     attribute :embeddings, :vector do
+      allow_nil? true
     end
 
     attribute :url, :string do
       allow_nil? false
+    end
+
+    attribute :token_count, :integer do
+      allow_nil? true
+    end
+
+    attribute :hash, :string do
+      allow_nil? true
+    end
+
+    attribute :embeddings_stale, :boolean do
+      allow_nil? false
+      default false
     end
   end
 end
