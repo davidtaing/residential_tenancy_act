@@ -4,6 +4,6 @@ defmodule ResidentialTenancyAct.Acts do
   resources do
     resource ResidentialTenancyAct.Acts.NSWRTASections
     resource ResidentialTenancyAct.Acts.NSWRTADivisions
-    resource ResidentialTenancyAct.Acts.NSWRTAPart
+    resource ResidentialTenancyAct.Acts.NSWRTAParts
   end
 end
