@@ -55,7 +55,7 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
 
     sections =
       divisions
-      |> Enum.map(fn item -> parse_division(item) end)
+      |> Enum.map(& parse_division/1)
       |> Enum.filter(& &1)
       |> List.flatten()
 
@@ -133,12 +133,16 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
 
       division_title = division_title_fragments |> Enum.join(" - ")
 
+      division_key =
+        division
+        |> String.replace("Division ", "")
+        |> String.trim()
+
       %{
-        id:
-          division
-          |> String.replace("Division ", ""),
+        id: format_division_id(division_key, part_id),
         title: division_title,
-        part_id: part_id
+        part_id: part_id,
+        division_id: division_key
       }
     end)
     |> hd()
@@ -179,6 +183,10 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
         url: url
       }
     end)
+  end
+
+  defp format_division_id(id, part_id) do
+    "P#{part_id}_D#{id}"
   end
 
   defp extract_part_title(full_title) do
