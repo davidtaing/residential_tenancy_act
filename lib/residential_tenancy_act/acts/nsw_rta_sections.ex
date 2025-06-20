@@ -39,6 +39,10 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
         :embeddings
       ]
     end
+
+    read :hashes do
+      prepare build(select: [:id, :hash])
+    end
   end
 
   attributes do
@@ -95,5 +99,13 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
     end
   end
 
-  def table_name(), do: "nsw_rta_sections"
+  @doc """
+  Generates a SHA-256 hash of the provided text content and returns it as a lowercase hex string.
+  This is used to detect changes in section content by comparing hashes rather than full text.
+  """
+  def hash_content(text) do
+    :crypto.hash(:sha256, text)
+    |> Base.encode16()
+    |> String.downcase()
+  end
 end

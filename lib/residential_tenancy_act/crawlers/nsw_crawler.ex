@@ -1,6 +1,10 @@
 defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
   use Crawly.Spider
 
+  require Logger
+
+  alias ResidentialTenancyAct.Acts.NSWRTASections
+
   @impl Crawly.Spider
   def base_url, do: "https://classic.austlii.edu.au/au/legis/nsw/consol_act/rta2010207/"
 
@@ -13,18 +17,15 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
   def parse_item(response) do
     url = response.request_url
 
-    IO.inspect("Crawler: Processing URL " <> url)
+    Logger.info("Crawler: Processing URL ", url: url)
 
-    parsed_item =
-      case url do
-        "https://classic.austlii.edu.au/au/legis/nsw/consol_act/rta2010207/" ->
-          parse_table_of_contents(response.body)
+    case url do
+      "https://classic.austlii.edu.au/au/legis/nsw/consol_act/rta2010207/" ->
+        parse_table_of_contents(response.body)
 
-        _ ->
-          parse_section(response.body)
-      end
-
-    parsed_item
+      _ ->
+        parse_section(response.body, %{url: url})
+    end
   end
 
   def parse_table_of_contents(body) do
@@ -55,7 +56,7 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
 
     sections =
       divisions
-      |> Enum.map(& parse_division/1)
+      |> Enum.map(&parse_division/1)
       |> Enum.filter(& &1)
       |> List.flatten()
 
@@ -205,14 +206,13 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
     |> String.replace("PART ", "")
   end
 
-  def parse_section(body) do
+  def parse_section(body, metadata \\ %{}) do
     section_prefix = "RESIDENTIAL TENANCIES ACT 2010 - SECT"
 
     # Split by <hr> and get the second part (index 1)
-    parts = String.split(body, "<HR>")
+    parts = String.split(body, ~r/<hr>/i)
 
-    raw_content =
-      Enum.at(parts, 1)
+    raw_content = Enum.at(parts, 1)
 
     # Parse the fragment safely
     fragment =
@@ -221,7 +221,7 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
           parsed
 
         {:error, reason} ->
-          IO.puts("Warning: Failed to parse HTML fragment: #{inspect(reason)}")
+          Logger.error("Failed to parse HTML fragment: #{inspect(reason)}", metadata: metadata)
           # Return empty list as fallback
           []
       end
@@ -252,10 +252,30 @@ defmodule ResidentialTenancyAct.Crawlers.NSWCrawler do
     # Only try to update if we have a valid section ID
     if section_id != "unknown" do
       try do
-        ResidentialTenancyAct.Acts.NSWRTASections
-        |> Ash.get!(section_id)
-        |> Ash.Changeset.for_update(:update, %{text: content})
-        |> Ash.update!()
+        section =
+          NSWRTASections
+          |> Ash.get!(section_id, action: :hashes)
+
+        new_hash = NSWRTASections.hash_content(content)
+
+        if section.hash != new_hash do
+          payload = %{
+            text: content,
+            hash: new_hash,
+            embeddings_stale: true
+          }
+
+          Logger.info("Updating section #{section_id} (NSW RTA)",
+            section_id: section_id,
+            hash: new_hash
+          )
+
+          section
+          |> Ash.Changeset.for_update(:update, payload)
+          |> Ash.update!()
+        else
+          Logger.debug("Section is up to date, skipping update (NSW RTA)", section_id: section_id)
+        end
       rescue
         e ->
           IO.puts("Warning: Failed to update section #{section_id}: #{inspect(e)}")
