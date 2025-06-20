@@ -1,8 +1,6 @@
 defmodule ResidentialTenancyAct.Workers.GenerateNSWEmbeddings do
   use Oban.Worker, queue: :default
 
-  import Ecto.Query
-
   alias ResidentialTenancyAct.Acts.NSWRTASections
 
   @page_size 20
