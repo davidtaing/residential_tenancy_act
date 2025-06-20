@@ -72,7 +72,6 @@ defmodule ResidentialTenancyAct.MixProject do
       {:jason, "~> 1.4"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:pgvector, "~> 0.3.0"},
       {:hackney, "~> 1.24.1"},
       {:ex_aws, "~> 2.5.10"},
       {:ex_aws_bedrock, "~> 2.5.1"},
