@@ -13,7 +13,7 @@ defmodule ResidentialTenancyAct.Acts.NSWRTADivisions do
   actions do
     defaults [:create, :read]
 
-    default_accept [:id, :title, :part_id]
+    default_accept [:id, :title, :part_id, :division_id]
   end
 
   attributes do
