@@ -17,12 +17,6 @@ defmodule ResidentialTenancyAct.Workers.GenerateNSWEmbeddings do
     :ok
   end
 
-  @spec get_sections(non_neg_integer(), non_neg_integer()) :: Ash.Page.Offset.t()
-  defp get_sections(limit, offset \\ 0) do
-    NSWRTASections
-    |> Ash.read!(page: [limit: limit, offset: offset])
-  end
-
   @spec process_page(Ash.Page.Offset.t()) :: :ok
   def process_page(page) do
     page.results
@@ -47,24 +41,20 @@ defmodule ResidentialTenancyAct.Workers.GenerateNSWEmbeddings do
     payload =
       case embedding_response do
         {:ok, embeddings, token_count} ->
-          %{embeddings: embeddings, token_count: token_count}
+          %{embeddings: embeddings, token_count: token_count, embeddings_stale: false}
 
         {:error, _error} ->
           nil
       end
 
-    if payload do
-      from(s in NSWRTASections.table_name(),
-        where: s.id == ^section.id,
-        update: [
-          set: [
-            embeddings: ^payload.embeddings,
-            token_count: ^payload.token_count,
-            embeddings_stale: false
-          ]
-        ]
-      )
-      |> ResidentialTenancyAct.Repo.update_all([], prefix: "rtas")
-    end
+    section
+    |> Ash.Changeset.for_update(:update, payload)
+    |> Ash.update!()
+  end
+
+  @spec get_sections(non_neg_integer(), non_neg_integer()) :: Ash.Page.Offset.t()
+  defp get_sections(limit, offset \\ 0) do
+    NSWRTASections
+    |> Ash.read!(page: [limit: limit, offset: offset])
   end
 end
