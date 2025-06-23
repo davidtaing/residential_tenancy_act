@@ -126,4 +126,9 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+
+  config :residential_tenancy_act, ResidentialTenancyAct.Mailer,
+    adapter: Swoosh.Adapters.SMTP2GO,
+    api_key: System.get_env("SMTP2GO_API_KEY"),
+    domain: System.get_env("SMTP2GO_DOMAIN")
 end
