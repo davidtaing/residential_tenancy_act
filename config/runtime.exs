@@ -41,7 +41,7 @@ if config_env() == :prod do
     # For machines with several cores, consider starting multiple pools of `pool_size`
     # pool_count: 4,
     socket_options: maybe_ipv6,
-    types: ResidentialTenancyAct.PostgresTypes
+    types: ResidentialTenancyAct.PostgrexTypes
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
