@@ -132,6 +132,11 @@ defmodule ResidentialTenancyActWeb.ChatLive do
   end
 
   @impl true
+  def handle_event("toggle_sidebar", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event(
         "keydown",
         %{"key" => "Enter", "shiftKey" => false, "ctrlKey" => false},
