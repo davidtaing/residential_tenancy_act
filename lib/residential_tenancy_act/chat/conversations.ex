@@ -26,6 +26,10 @@ defmodule ResidentialTenancyAct.Chat.Conversations do
       allow_nil? false
     end
 
+    attribute :title, :string do
+      allow_nil? true
+    end
+
     create_timestamp :created_at
 
     update_timestamp :updated_at
