@@ -3,8 +3,29 @@ defmodule ResidentialTenancyActWeb.ChatLive do
 
   on_mount {ResidentialTenancyActWeb.LiveUserAuth, :live_user_required}
 
+  alias ResidentialTenancyActWeb.ChatLive.SidebarComponent
+
+  @impl true
+  def mount(%{"conversation_id" => conversation_id}, _session, socket) do
+    # Load conversation by ID
+    conversation = load_conversation(conversation_id)
+
+    socket = assign(socket,
+      messages: conversation.messages,
+      current_message: "",
+      loading: false,
+      selected_state: "NSW",
+      sidebar_open: false,
+      conversation_id: conversation_id
+    )
+
+    IO.inspect(socket.assigns.messages, label: "Messages in mount for conversation #{conversation_id}")
+    {:ok, socket}
+  end
+
   @impl true
   def mount(_params, _session, socket) do
+    # Default mount for new conversations
     fake_messages = [
       %{
         id: 1,
@@ -84,7 +105,9 @@ defmodule ResidentialTenancyActWeb.ChatLive do
       messages: fake_messages,
       current_message: "",
       loading: false,
-      selected_state: "NSW"
+      selected_state: "NSW",
+      sidebar_open: false,
+      conversation_id: nil
     )
 
     IO.inspect(socket.assigns.messages, label: "Messages in mount")
@@ -133,7 +156,7 @@ defmodule ResidentialTenancyActWeb.ChatLive do
 
   @impl true
   def handle_event("toggle_sidebar", _params, socket) do
-    {:noreply, socket}
+    {:noreply, assign(socket, sidebar_open: !socket.assigns.sidebar_open)}
   end
 
   @impl true
@@ -190,5 +213,52 @@ defmodule ResidentialTenancyActWeb.ChatLive do
 
   defp format_timestamp(datetime) do
     Calendar.strftime(datetime, "%I:%M %p")
+  end
+
+  defp load_conversation(conversation_id) do
+    # For now, return fake data. This would be replaced with actual database queries
+    case conversation_id do
+      "1" -> %{
+        id: "1",
+        title: "Tenancy Rights Discussion",
+        messages: [
+          %{
+            id: 1,
+            content: "Hi! I'm having issues with my landlord not fixing a leaking tap. What are my rights?",
+            role: :user,
+            timestamp: DateTime.utc_now() |> DateTime.add(-7200, :second)
+          },
+          %{
+            id: 2,
+            content: "Under NSW tenancy law, landlords are required to maintain the property in a reasonable state of repair. A leaking tap would generally be considered an urgent repair that needs to be fixed within a reasonable time.\n\nYou should:\n1. Notify your landlord in writing about the issue\n2. Give them a reasonable time to fix it (usually 14 days for non-urgent repairs)\n3. If they don't respond, you can apply to the NSW Civil and Administrative Tribunal (NCAT)\n\nWould you like me to help you draft a formal request to your landlord?",
+            role: :assistant,
+            timestamp: DateTime.utc_now() |> DateTime.add(-7100, :second)
+          }
+        ]
+      }
+      "2" -> %{
+        id: "2",
+        title: "Rent Increase Questions",
+        messages: [
+          %{
+            id: 1,
+            content: "What about rent increases? How often can my landlord raise the rent?",
+            role: :user,
+            timestamp: DateTime.utc_now() |> DateTime.add(-3600, :second)
+          },
+          %{
+            id: 2,
+            content: "In NSW, rent increases are regulated under the Residential Tenancies Act 2010:\n\n• **Frequency**: Rent can only be increased once every 12 months\n• **Notice**: You must receive at least 60 days written notice before a rent increase\n• **Reasonableness**: The increase must be reasonable compared to market rates\n• **Fixed-term leases**: Rent cannot be increased during a fixed-term lease unless specified in the agreement",
+            role: :assistant,
+            timestamp: DateTime.utc_now() |> DateTime.add(-3500, :second)
+          }
+        ]
+      }
+      _ -> %{
+        id: conversation_id,
+        title: "Conversation #{conversation_id}",
+        messages: []
+      }
+    end
   end
 end

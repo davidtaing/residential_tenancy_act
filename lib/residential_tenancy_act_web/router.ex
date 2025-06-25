@@ -36,14 +36,15 @@ defmodule ResidentialTenancyActWeb.Router do
       # If an authenticated user must *not* be present:
       # on_mount {ResidentialTenancyActWeb.LiveUserAuth, :live_no_user}
 
+      live "/", ChatLive, :home
       live "/chat", ChatLive, :index
+      live "/chat/:conversation_id", ChatLive, :show
     end
   end
 
   scope "/", ResidentialTenancyActWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
     auth_routes AuthController, ResidentialTenancyAct.Accounts.User, path: "/auth"
     sign_out_route AuthController
 
