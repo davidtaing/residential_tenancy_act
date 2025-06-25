@@ -35,6 +35,8 @@ defmodule ResidentialTenancyActWeb.Router do
       #
       # If an authenticated user must *not* be present:
       # on_mount {ResidentialTenancyActWeb.LiveUserAuth, :live_no_user}
+
+      live "/chat", ChatLive, :index
     end
   end
 

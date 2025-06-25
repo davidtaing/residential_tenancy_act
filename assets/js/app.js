@@ -25,9 +25,21 @@ import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+// Auto-resize hook for textarea
+const AutoResize = {
+  mounted() {
+    this.el.addEventListener('input', () => {
+      this.el.style.height = 'auto';
+      this.el.style.height = Math.min(this.el.scrollHeight, 120) + 'px';
+    });
+  }
+};
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: {_csrf_token: csrfToken},
+  hooks: {AutoResize}
 })
 
 // Show progress bar on live navigation and form submits

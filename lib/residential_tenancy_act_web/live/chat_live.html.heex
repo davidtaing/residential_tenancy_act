@@ -1,0 +1,193 @@
+<div class="flex flex-col h-screen bg-emerald-100">
+  <!-- Header -->
+  <div class="px-6 py-4 bg-emerald-950 text-white">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div>
+          <h1 class="text-2xl font-light tracking-wide">TenancyBot</h1>
+          <p class="text-sm text-emerald-300 font-light">Your tenancy law assistant</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-emerald-300">Signed in as</span>
+          <span class="text-sm font-medium"><%= @current_user.email %></span>
+        </div>
+        <a href="/auth/sign-out" class="text-sm text-emerald-300 hover:text-white transition-colors">
+          Sign out
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- State Selection Bar -->
+  <div class="px-6 py-3 bg-emerald-900 text-white">
+    <div class="flex items-center gap-3">
+      <span class="text-sm font-medium">State:</span>
+      <select 
+        name="state" 
+        phx-change="change_state"
+        class="bg-white text-emerald-900 px-3 py-1 rounded-md text-sm border-0 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+      >
+        <option value="NSW" selected={@selected_state == "NSW"}>NSW</option>
+        <option value="VIC" disabled>VIC</option>
+        <option value="QLD" disabled>QLD</option>
+        <option value="WA" disabled>WA</option>
+        <option value="SA" disabled>SA</option>
+        <option value="TAS" disabled>TAS</option>
+        <option value="NT" disabled>NT</option>
+        <option value="ACT" disabled>ACT</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="flex-1 overflow-y-auto p-6 space-y-6" id="chat-messages" phx-update="append">
+    <%= if @messages == [] do %>
+      <!-- Welcome Message -->
+      <div class="flex justify-center items-center h-full">
+        <div class="text-center max-w-lg">
+          <div class="mb-8">
+            <div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-3xl bg-emerald-700 text-white">
+              🤖
+            </div>
+          </div>
+          <h2 class="text-3xl font-light mb-4 text-emerald-950">Welcome to TenancyBot</h2>
+          <p class="text-lg mb-8 leading-relaxed text-emerald-800">
+            I'm here to help you understand tenancy laws and regulations. 
+            Ask me questions about your rights and obligations.
+          </p>
+          <div class="space-y-3 mb-8">
+            <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">"What are my rights as a tenant?"</div>
+            <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">"How much notice do I need to give?"</div>
+            <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">"What can I do about repairs?"</div>
+          </div>
+          <div class="p-4 rounded-lg bg-emerald-200 border border-emerald-300">
+            <p class="text-sm text-emerald-800">
+              <strong>Note:</strong> Currently supporting <%= @selected_state %> only. Other states coming soon!
+            </p>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <%= for message <- @messages do %>
+        <div id={"message-#{message.id}"} class="flex gap-4">
+          <%= if message.sender == :user do %>
+            <!-- User Message -->
+            <div class="flex-1"></div>
+            <div class="flex flex-col items-end max-w-md">
+              <div class="px-6 py-3 rounded-2xl rounded-br-md shadow-sm bg-emerald-700 text-white">
+                <p class="text-sm whitespace-pre-wrap leading-relaxed"><%= message.content %></p>
+              </div>
+              <span class="text-xs mt-2 text-emerald-700 opacity-70">
+                <%= format_timestamp(message.timestamp) %>
+              </span>
+            </div>
+          <% else %>
+            <!-- Bot Message -->
+            <div class="flex flex-col items-start max-w-md">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm bg-emerald-300 text-emerald-900">
+                  🤖
+                </div>
+                <div class="px-6 py-3 rounded-2xl rounded-bl-md shadow-sm bg-white border border-emerald-300">
+                  <p class="text-sm whitespace-pre-wrap leading-relaxed text-emerald-900"><%= message.content %></p>
+                </div>
+              </div>
+              <span class="text-xs mt-2 ml-11 text-emerald-700 opacity-70">
+                <%= format_timestamp(message.timestamp) %>
+              </span>
+            </div>
+            <div class="flex-1"></div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- Loading Indicator -->
+  <%= if @loading do %>
+    <div class="flex gap-4 px-6 pb-6">
+      <div class="flex flex-col items-start max-w-md">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm bg-emerald-300 text-emerald-900">
+            🤖
+          </div>
+          <div class="px-6 py-3 rounded-2xl rounded-bl-md shadow-sm bg-white border border-emerald-300">
+            <div class="flex items-center gap-3">
+              <div class="flex space-x-1">
+                <div class="w-2 h-2 rounded-full animate-bounce bg-emerald-600"></div>
+                <div class="w-2 h-2 rounded-full animate-bounce bg-emerald-600" style="animation-delay: 0.1s;"></div>
+                <div class="w-2 h-2 rounded-full animate-bounce bg-emerald-600" style="animation-delay: 0.2s;"></div>
+              </div>
+              <span class="text-sm text-emerald-800">Thinking...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex-1"></div>
+    </div>
+  <% end %>
+
+  <!-- Input Area -->
+  <div class="p-6 bg-white border-t border-emerald-300">
+    <form phx-submit="send_message" class="flex gap-3">
+      <div class="flex-1 relative">
+        <textarea
+          id="chat-input"
+          name="message"
+          value={@current_message}
+          phx-keyup="update_message"
+          phx-keydown="keydown"
+          placeholder="Ask me about tenancy laws..."
+          class="w-full resize-none px-4 py-3 rounded-xl border border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 text-sm bg-emerald-100 text-emerald-900 placeholder-emerald-600"
+          rows="1"
+          maxlength="1000"
+          phx-hook="AutoResize"
+        ></textarea>
+        <button
+          type="submit"
+          disabled={String.trim(@current_message) == ""}
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-700 text-white hover:bg-emerald-800"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+          </svg>
+        </button>
+      </div>
+    </form>
+    <div class="flex justify-between items-center mt-3 text-xs text-emerald-700">
+      <span>Press Enter or Ctrl Enter to send. Shift+Enter for new line.</span>
+      <span><%= String.length(@current_message) %>/1000</span>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="px-6 py-4 text-center bg-emerald-200 border-t border-emerald-300">
+    <p class="text-xs leading-relaxed text-emerald-800">
+      TenancyBot may make mistakes. Please double-check all responses and review the official links provided. For complex issues, consider seeking legal advice.
+    </p>
+  </div>
+</div>
+
+<script>
+  // Auto-resize textarea
+  document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.querySelector('textarea[name="message"]');
+    if (textarea) {
+      textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+    }
+  });
+
+  // Scroll to bottom when new messages arrive
+  const chatMessages = document.getElementById('chat-messages');
+  if (chatMessages) {
+    const observer = new MutationObserver(function() {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+    observer.observe(chatMessages, { childList: true, subtree: true });
+  }
+</script> 
