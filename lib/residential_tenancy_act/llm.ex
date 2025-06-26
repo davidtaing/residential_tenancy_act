@@ -30,7 +30,7 @@ defmodule ResidentialTenancyAct.LLM do
             Map.put(metadata, :token_count, token_count)
           )
 
-          {:ok, embeddings, token_count}
+          {:ok, embeddings}
 
         {:ok, unexpected_response} ->
           Logger.error(
@@ -48,31 +48,43 @@ defmodule ResidentialTenancyAct.LLM do
   end
 
   def generate_text_response(messages, metadata \\ %{}) do
-    request = messages
-    |> build_response_payload()
-    |> then(&ExAws.Bedrock.invoke_model(@text_model, &1))
+    request =
+      messages
+      |> build_response_payload()
+      |> ResidentialTenancyAct.LLM.AWSNovaRequest.to_map()
+      |> then(&ExAws.Bedrock.invoke_model(@text_model, &1))
 
-    response = request
-    |> ExAws.Bedrock.request(
-      region: @aws_region
-    )
+    response =
+      request
+      |> ExAws.Bedrock.request(region: @aws_region)
 
     case response do
-      {:ok, %{"output" => %{"message" => %{"content" => [%{"text" => text}]}}}} ->
+      {:ok, %{"output" => %{"message" => %{"content" => [%{"text" => text}]}}, "usage" => usage} = res} ->
+        result = %{
+          text: text,
+          usage: usage
+        }
+
         Logger.debug("Generated text response successfully", Map.put(metadata, :text, text))
-        {:ok, text}
+        {:ok, result}
 
       _ ->
-        Logger.error("Unexpected response format from Bedrock", Map.put(metadata, :response, response))
+        Logger.error(
+          "Unexpected response format from Bedrock",
+          Map.put(metadata, :response, response)
+        )
+
         {:error, :unexpected_response_format}
     end
   end
 
+  @spec build_response_payload([ResidentialTenancyAct.LLM.AWSNovaRequest.Message.t()]) ::
+          ResidentialTenancyAct.LLM.AWSNovaRequest.t()
   defp build_response_payload(messages) do
-    %{
-      "messages" => messages,
-      "inferenceConfig" => %{
-        "temperature" => 0.9
+    %ResidentialTenancyAct.LLM.AWSNovaRequest{
+      messages: messages,
+      inferenceConfig: %ResidentialTenancyAct.LLM.AWSNovaRequest.InferenceConfig{
+        temperature: 0.9
       }
     }
   end
