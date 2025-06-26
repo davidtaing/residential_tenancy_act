@@ -1,6 +1,34 @@
 defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
   use ResidentialTenancyActWeb, :live_component
 
+  require Ash.Query
+
+  alias ResidentialTenancyAct.Chat.Conversations
+
+  @impl true
+  def update(assigns, socket) do
+    current_user = assigns.current_user
+    sidebar_open = assigns.sidebar_open
+    conversation_id = assigns.conversation_id
+
+    conversations =
+      Conversations
+      |> Ash.Query.filter(user_id: current_user.id)
+      |> Ash.Query.sort(created_at: :desc)
+      |> Ash.read!(actor: current_user)
+
+    socket =
+      socket
+      |> assign(
+        conversations: conversations,
+        current_user: current_user,
+        sidebar_open: sidebar_open,
+        conversation_id: conversation_id
+      )
+
+    {:ok, socket}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -28,48 +56,33 @@ defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
           </button>
         </div>
       </div>
-      
+
     <!-- Conversation List -->
       <div class="flex-1 overflow-y-auto p-4 space-y-2">
-        <div class="space-y-2">
-          <a
-            href="/chat/1"
-            class={"block p-3 rounded-lg transition-colors #{if @conversation_id == "1", do: "bg-emerald-800", else: "hover:bg-emerald-800"}"}
-          >
-            <div class="text-sm font-medium">Tenancy Rights Discussion</div>
-            <div class="text-xs text-emerald-300 mt-1">Today, 2:30 PM</div>
-          </a>
-          <a
-            href="/chat/2"
-            class={"block p-3 rounded-lg transition-colors #{if @conversation_id == "2", do: "bg-emerald-800", else: "hover:bg-emerald-800"}"}
-          >
-            <div class="text-sm font-medium">Rent Increase Questions</div>
-            <div class="text-xs text-emerald-300 mt-1">Yesterday, 4:15 PM</div>
-          </a>
-          <a
-            href="/chat/3"
-            class={"block p-3 rounded-lg transition-colors #{if @conversation_id == "3", do: "bg-emerald-800", else: "hover:bg-emerald-800"}"}
-          >
-            <div class="text-sm font-medium">Repair Issues</div>
-            <div class="text-xs text-emerald-300 mt-1">2 days ago</div>
-          </a>
-          <a
-            href="/chat/4"
-            class={"block p-3 rounded-lg transition-colors #{if @conversation_id == "4", do: "bg-emerald-800", else: "hover:bg-emerald-800"}"}
-          >
-            <div class="text-sm font-medium">Lease Termination</div>
-            <div class="text-xs text-emerald-300 mt-1">1 week ago</div>
-          </a>
-          <a
-            href="/chat/5"
-            class={"block p-3 rounded-lg transition-colors #{if @conversation_id == "5", do: "bg-emerald-800", else: "hover:bg-emerald-800"}"}
-          >
-            <div class="text-sm font-medium">Bond Refund Process</div>
-            <div class="text-xs text-emerald-300 mt-1">2 weeks ago</div>
-          </a>
-        </div>
+        <%= if Enum.empty?(@conversations) do %>
+          <div class="text-center py-8">
+            <div class="text-emerald-300 text-sm">No conversations yet</div>
+            <div class="text-emerald-500 text-xs mt-1">Start a new conversation to begin</div>
+          </div>
+        <% else %>
+          <div class="space-y-2">
+            <%= for conversation <- @conversations do %>
+              <a
+                href={~p"/chat/#{conversation.id}"}
+                class={"block p-3 rounded-lg transition-colors #{if @conversation_id == conversation.id, do: "bg-emerald-800", else: "hover:bg-emerald-800"}"}
+              >
+                <div class="text-sm font-medium">
+                  <%= conversation.title || "New Conversation" %>
+                </div>
+                <div class="text-xs text-emerald-300 mt-1">
+                  <%= format_relative_time(conversation.created_at) %>
+                </div>
+              </a>
+            <% end %>
+          </div>
+        <% end %>
       </div>
-      
+
     <!-- Sidebar Footer -->
       <div class="p-4 border-t border-emerald-800">
         <a
@@ -81,5 +94,19 @@ defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
       </div>
     </div>
     """
+  end
+
+  defp format_relative_time(datetime) do
+    now = DateTime.utc_now()
+    diff = DateTime.diff(now, datetime, :second)
+
+    cond do
+      diff < 60 -> "Just now"
+      diff < 3600 -> "#{div(diff, 60)}m ago"
+      diff < 86400 -> "#{div(diff, 3600)}h ago"
+      diff < 604800 -> "#{div(diff, 86400)}d ago"
+      diff < 2592000 -> "#{div(diff, 604800)}w ago"
+      true -> Calendar.strftime(datetime, "%b %d, %Y")
+    end
   end
 end

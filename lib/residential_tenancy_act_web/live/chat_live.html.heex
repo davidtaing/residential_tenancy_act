@@ -5,6 +5,7 @@
     id="sidebar"
     sidebar_open={@sidebar_open}
     conversation_id={@conversation_id}
+    current_user={@current_user}
   />
   
 <!-- Main Content -->
@@ -115,7 +116,7 @@
                     <p class="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                   </div>
                   <span class="text-xs mt-2 text-emerald-700 opacity-70">
-                    {format_timestamp(message.timestamp)}
+                    {format_timestamp(message.created_at)}
                   </span>
                 </div>
               <% else %>
@@ -123,7 +124,7 @@
                 <div class="w-full py-10">
                   <div class="flex items-start gap-3 mb-2">
                     <span class="text-xs text-emerald-700 opacity-70">
-                      {format_timestamp(message.timestamp)}
+                      {format_timestamp(message.created_at)}
                     </span>
                   </div>
                   <div>
@@ -175,7 +176,7 @@
 <!-- Input Area -->
     <div class="p-6 bg-white border-t border-emerald-300">
       <div class="max-w-4xl mx-auto">
-        <form phx-submit="send_message" class="flex gap-3">
+        <form id="ChatForm" phx-submit="send_message" class="flex gap-3" phx-hook="ChatForm">
           <div class="flex-1 relative">
             <textarea
               id="chat-input"
@@ -226,6 +227,15 @@
 </div>
 
 <script>
+  // Chat form hook
+  const ChatForm = {
+    mounted() {
+      this.handleEvent("submit_form", () => {
+        this.el.requestSubmit();
+      });
+    }
+  };
+
   // Sidebar toggle functionality
   document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.getElementById('sidebar');
