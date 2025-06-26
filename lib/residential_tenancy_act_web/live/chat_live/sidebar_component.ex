@@ -56,7 +56,7 @@ defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
           </button>
         </div>
       </div>
-
+      
     <!-- Conversation List -->
       <div class="flex-1 overflow-y-auto p-4 space-y-2">
         <%= if Enum.empty?(@conversations) do %>
@@ -72,17 +72,17 @@ defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
                 class={"block p-3 rounded-lg transition-colors #{if @conversation_id == conversation.id, do: "bg-emerald-800", else: "hover:bg-emerald-800"}"}
               >
                 <div class="text-sm font-medium">
-                  <%= conversation.title || "New Conversation" %>
+                  {conversation.title || "New Conversation"}
                 </div>
                 <div class="text-xs text-emerald-300 mt-1">
-                  <%= format_relative_time(conversation.created_at) %>
+                  {format_relative_time(conversation.created_at)}
                 </div>
               </a>
             <% end %>
           </div>
         <% end %>
       </div>
-
+      
     <!-- Sidebar Footer -->
       <div class="p-4 border-t border-emerald-800">
         <a
@@ -104,8 +104,8 @@ defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
       diff < 60 -> "Just now"
       diff < 3600 -> "#{div(diff, 60)}m ago"
       diff < 86400 -> "#{div(diff, 3600)}h ago"
-      diff < 604800 -> "#{div(diff, 86400)}d ago"
-      diff < 2592000 -> "#{div(diff, 604800)}w ago"
+      diff < 604_800 -> "#{div(diff, 86400)}d ago"
+      diff < 2_592_000 -> "#{div(diff, 604_800)}w ago"
       true -> Calendar.strftime(datetime, "%b %d, %Y")
     end
   end
