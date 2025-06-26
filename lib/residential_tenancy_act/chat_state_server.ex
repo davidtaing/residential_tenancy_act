@@ -55,7 +55,7 @@ defmodule ResidentialTenancyAct.ChatStateServer do
 
 
   @impl true
-  def handle_cast({:change_state, :idle}, %ChatState{client: clien} = s) do
+  def handle_cast({:change_state, :idle}, %ChatState{client: client} = _s) do
     {:noreply, %ChatState{client: client, state: :idle}}
   end
 
