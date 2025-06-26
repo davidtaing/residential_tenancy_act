@@ -12,7 +12,7 @@ defmodule ResidentialTenancyAct.Chat.Messages do
   actions do
     defaults [:create, :read]
 
-    default_accept [:user_id, :role, :content]
+    default_accept [:user_id, :role, :content, :conversation_id]
   end
 
   attributes do
@@ -31,6 +31,10 @@ defmodule ResidentialTenancyAct.Chat.Messages do
       allow_nil? false
     end
 
+    attribute :conversation_id, :uuid do
+      allow_nil? false
+    end
+
     create_timestamp :created_at
   end
 
@@ -44,12 +48,15 @@ defmodule ResidentialTenancyAct.Chat.Messages do
     end
   end
 
+  @spec to_aws_messages([%{role: atom(), content: String.t()}]) :: [
+          ResidentialTenancyAct.LLM.AWSNovaRequest.Message.t()
+        ]
   def to_aws_messages(messages) do
     messages
     |> Enum.map(fn message ->
-      %{
-        "role" => Atom.to_string(message.role),
-        "content" => [%{"text" => message.content}]
+      %ResidentialTenancyAct.LLM.AWSNovaRequest.Message{
+        role: Atom.to_string(message.role),
+        content: [%{"text" => message.content}]
       }
     end)
   end
