@@ -28,7 +28,7 @@ defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
           </button>
         </div>
       </div>
-
+      
     <!-- Conversation List -->
       <div class="flex-1 overflow-y-auto p-4 space-y-2">
         <div class="space-y-2">
@@ -69,7 +69,7 @@ defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
           </a>
         </div>
       </div>
-
+      
     <!-- Sidebar Footer -->
       <div class="p-4 border-t border-emerald-800">
         <a

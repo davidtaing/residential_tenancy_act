@@ -1,19 +1,30 @@
 <div class="flex h-screen bg-emerald-100">
   <!-- Sidebar -->
-  <.live_component module={SidebarComponent} id="sidebar" sidebar_open={@sidebar_open} conversation_id={@conversation_id} />
-
-  <!-- Main Content -->
+  <.live_component
+    module={SidebarComponent}
+    id="sidebar"
+    sidebar_open={@sidebar_open}
+    conversation_id={@conversation_id}
+  />
+  
+<!-- Main Content -->
   <div class="flex-1 flex flex-col">
     <!-- Header -->
     <div class="px-6 py-4 bg-emerald-950 text-white">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <button 
+          <button
             class="p-2 hover:bg-emerald-800 rounded-md transition-colors"
             phx-click="toggle_sidebar"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              >
+              </path>
             </svg>
           </button>
           <div>
@@ -24,7 +35,7 @@
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <span class="text-sm text-emerald-300">Signed in as</span>
-            <span class="text-sm font-medium"><%= @current_user.email %></span>
+            <span class="text-sm font-medium">{@current_user.email}</span>
           </div>
           <a href="/sign-out" class="text-sm text-emerald-300 hover:text-white transition-colors">
             Sign out
@@ -32,13 +43,13 @@
         </div>
       </div>
     </div>
-
-    <!-- State Selection Bar -->
+    
+<!-- State Selection Bar -->
     <div class="px-6 py-3 bg-emerald-900 text-white">
       <div class="max-w-4xl mx-auto flex items-center gap-3">
         <span class="text-sm font-medium">State:</span>
-        <select 
-          name="state" 
+        <select
+          name="state"
           phx-change="change_state"
           class="bg-white text-emerald-900 px-3 py-1 rounded-md text-sm border-0 focus:outline-none focus:ring-2 focus:ring-emerald-400"
         >
@@ -53,9 +64,12 @@
         </select>
       </div>
     </div>
-
-    <!-- Chat Messages -->
-    <div class="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-400 hover:scrollbar-thumb-gray-500" id="chat-messages">
+    
+<!-- Chat Messages -->
+    <div
+      class="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-400 hover:scrollbar-thumb-gray-500"
+      id="chat-messages"
+    >
       <div class="max-w-4xl mx-auto">
         <%= if @messages == [] do %>
           <!-- Welcome Message -->
@@ -68,17 +82,24 @@
               </div>
               <h2 class="text-3xl font-light mb-4 text-emerald-950">Welcome to TenancyBot</h2>
               <p class="text-lg mb-8 leading-relaxed text-emerald-800">
-                I'm here to help you understand tenancy laws and regulations. 
+                I'm here to help you understand tenancy laws and regulations.
                 Ask me questions about your rights and obligations.
               </p>
               <div class="space-y-3 mb-8">
-                <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">"What are my rights as a tenant?"</div>
-                <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">"How much notice do I need to give?"</div>
-                <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">"What can I do about repairs?"</div>
+                <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">
+                  "What are my rights as a tenant?"
+                </div>
+                <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">
+                  "How much notice do I need to give?"
+                </div>
+                <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">
+                  "What can I do about repairs?"
+                </div>
               </div>
               <div class="p-4 rounded-lg bg-emerald-200 border border-emerald-300">
                 <p class="text-sm text-emerald-800">
-                  <strong>Note:</strong> Currently supporting <%= @selected_state %> only. Other states coming soon!
+                  <strong>Note:</strong>
+                  Currently supporting {@selected_state} only. Other states coming soon!
                 </p>
               </div>
             </div>
@@ -91,10 +112,10 @@
                 <div class="flex-1"></div>
                 <div class="flex flex-col items-end max-w-md">
                   <div class="px-6 py-3 rounded-2xl rounded-br-md shadow-sm bg-emerald-700 text-white">
-                    <p class="text-sm whitespace-pre-wrap leading-relaxed"><%= message.content %></p>
+                    <p class="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                   </div>
                   <span class="text-xs mt-2 text-emerald-700 opacity-70">
-                    <%= format_timestamp(message.timestamp) %>
+                    {format_timestamp(message.timestamp)}
                   </span>
                 </div>
               <% else %>
@@ -102,11 +123,13 @@
                 <div class="w-full py-10">
                   <div class="flex items-start gap-3 mb-2">
                     <span class="text-xs text-emerald-700 opacity-70">
-                      <%= format_timestamp(message.timestamp) %>
+                      {format_timestamp(message.timestamp)}
                     </span>
                   </div>
                   <div>
-                    <p class="text-sm leading-relaxed text-emerald-900 whitespace-pre-wrap"><%= message.content %></p>
+                    <p class="text-sm leading-relaxed text-emerald-900 whitespace-pre-wrap">
+                      {message.content}
+                    </p>
                   </div>
                 </div>
               <% end %>
@@ -115,8 +138,8 @@
         <% end %>
       </div>
     </div>
-
-    <!-- Loading Indicator -->
+    
+<!-- Loading Indicator -->
     <%= if @loading do %>
       <div class="flex gap-4 px-6 pb-6">
         <div class="max-w-4xl mx-auto w-full">
@@ -129,8 +152,16 @@
                 <div class="flex items-center gap-3">
                   <div class="flex space-x-1">
                     <div class="w-2 h-2 rounded-full animate-bounce bg-emerald-600"></div>
-                    <div class="w-2 h-2 rounded-full animate-bounce bg-emerald-600" style="animation-delay: 0.1s;"></div>
-                    <div class="w-2 h-2 rounded-full animate-bounce bg-emerald-600" style="animation-delay: 0.2s;"></div>
+                    <div
+                      class="w-2 h-2 rounded-full animate-bounce bg-emerald-600"
+                      style="animation-delay: 0.1s;"
+                    >
+                    </div>
+                    <div
+                      class="w-2 h-2 rounded-full animate-bounce bg-emerald-600"
+                      style="animation-delay: 0.2s;"
+                    >
+                    </div>
                   </div>
                   <span class="text-sm text-emerald-800">Thinking...</span>
                 </div>
@@ -140,8 +171,8 @@
         </div>
       </div>
     <% end %>
-
-    <!-- Input Area -->
+    
+<!-- Input Area -->
     <div class="p-6 bg-white border-t border-emerald-300">
       <div class="max-w-4xl mx-auto">
         <form phx-submit="send_message" class="flex gap-3">
@@ -165,19 +196,25 @@
               class="absolute right-3 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-700 text-white hover:bg-emerald-800"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                >
+                </path>
               </svg>
             </button>
           </div>
         </form>
         <div class="flex justify-between items-center mt-3 text-xs text-emerald-700">
           <span>Press Enter or Ctrl Enter to send. Shift+Enter for new line.</span>
-          <span><%= String.length(@current_message) %>/1000</span>
+          <span>{String.length(@current_message)}/1000</span>
         </div>
       </div>
     </div>
-
-    <!-- Disclaimer -->
+    
+<!-- Disclaimer -->
     <div class="px-6 py-4 text-center bg-emerald-200 border-t border-emerald-300">
       <div class="max-w-4xl mx-auto">
         <p class="text-xs leading-relaxed text-emerald-800">
@@ -246,4 +283,4 @@
     });
     observer.observe(chatMessages, { childList: true, subtree: true });
   }
-</script> 
+</script>
