@@ -15,6 +15,10 @@ defmodule ResidentialTenancyAct.Chat.Conversations do
     create :create do
       change relate_actor(:user, field: :id)
     end
+
+    update :update do
+      accept [:title]
+    end
   end
 
   policies do
