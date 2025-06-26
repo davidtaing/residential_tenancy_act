@@ -19,6 +19,23 @@ defmodule ResidentialTenancyAct.Chat.TokenHistory do
     end
   end
 
+  policies do
+    policy action_type(:read) do
+      description "Users can only read their own token history"
+      authorize_if relates_to_actor_via(:user)
+    end
+
+    policy action_type(:create) do
+      description "Any one can create a token history"
+      authorize_if always()
+    end
+
+    policy action_type(:update) do
+      description "Users can only update their own token history"
+      authorize_if relates_to_actor_via(:user)
+    end
+  end
+
   attributes do
     uuid_v7_primary_key :id
 

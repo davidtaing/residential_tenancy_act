@@ -10,9 +10,30 @@ defmodule ResidentialTenancyAct.Chat.Messages do
   end
 
   actions do
-    defaults [:create, :read]
+    defaults [:read]
 
-    default_accept [:user_id, :role, :content, :conversation_id]
+    create :create do
+      accept [:user_id, :role, :content, :conversation_id]
+
+      change relate_actor(:user, field: :id)
+    end
+  end
+
+  policies do
+    policy action_type(:read) do
+      description "Users can only read their own messages"
+      authorize_if relates_to_actor_via(:user)
+    end
+
+    policy action_type(:create) do
+      description "Any one can create a messages"
+      authorize_if always()
+    end
+
+    policy action_type(:update) do
+      description "Users can only update their own messages"
+      authorize_if relates_to_actor_via(:user)
+    end
   end
 
   attributes do
