@@ -43,4 +43,14 @@ defmodule ResidentialTenancyAct.Chat.Messages do
       source_attribute :conversation_id
     end
   end
+
+  def to_aws_messages(messages) do
+    messages
+    |> Enum.map(fn message ->
+      %{
+        "role" => Atom.to_string(message.role),
+        "content" => [%{"text" => message.content}]
+      }
+    end)
+  end
 end

@@ -1,5 +1,6 @@
 defmodule ResidentialTenancyAct.LLM do
   @embeddings_model "amazon.titan-embed-text-v2:0"
+  @text_model "apac.amazon.nova-lite-v1:0"
   @aws_region "ap-southeast-2"
 
   require Logger
@@ -44,6 +45,36 @@ defmodule ResidentialTenancyAct.LLM do
           {:error, error}
       end
     end
+  end
+
+  def generate_text_response(messages, metadata \\ %{}) do
+    request = messages
+    |> build_response_payload()
+    |> then(&ExAws.Bedrock.invoke_model(@text_model, &1))
+
+    response = request
+    |> ExAws.Bedrock.request(
+      region: @aws_region
+    )
+
+    case response do
+      {:ok, %{"output" => %{"message" => %{"content" => [%{"text" => text}]}}}} ->
+        Logger.debug("Generated text response successfully", Map.put(metadata, :text, text))
+        {:ok, text}
+
+      _ ->
+        Logger.error("Unexpected response format from Bedrock", Map.put(metadata, :response, response))
+        {:error, :unexpected_response_format}
+    end
+  end
+
+  defp build_response_payload(messages) do
+    %{
+      "messages" => messages,
+      "inferenceConfig" => %{
+        "temperature" => 0.9
+      }
+    }
   end
 
   @spec build_embedding_payload(String.t()) :: map()
