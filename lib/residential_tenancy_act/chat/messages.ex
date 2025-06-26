@@ -76,8 +76,8 @@ defmodule ResidentialTenancyAct.Chat.Messages do
     messages
     |> Enum.map(fn message ->
       %ResidentialTenancyAct.LLM.AWSNovaRequest.Message{
-        role: Atom.to_string(message.role),
-        content: [%{"text" => message.content}]
+        role: message.role,
+        content: [%ResidentialTenancyAct.LLM.AWSNovaRequest.TextContent{text: message.content}]
       }
     end)
   end
