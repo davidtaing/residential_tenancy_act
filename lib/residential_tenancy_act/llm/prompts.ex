@@ -37,6 +37,8 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
         Limitations & Recommendations
         State any gaps or limitations in the provided Act sections.
         Recommend professional legal advice where necessary.
+
+        Use markdown to format your response.
     """
   end
 
@@ -62,5 +64,21 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
 
     Respond with only the title, no additional text or explanation.
     """
+  end
+
+  def format_sections_context(sections) do
+    sections
+    |> Enum.map(fn section ->
+      """
+      Section #{section.id}: #{section.title}
+      URL: #{section.url}
+
+      Content:
+      #{section.text}
+
+      ---
+      """
+    end)
+    |> Enum.join("\n")
   end
 end
