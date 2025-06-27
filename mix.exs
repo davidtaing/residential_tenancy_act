@@ -77,7 +77,8 @@ defmodule ResidentialTenancyAct.MixProject do
       {:ex_aws_bedrock, "~> 2.5.1"},
       {:envy, "~> 1.1.1"},
       {:earmark, "~> 1.4"},
-      {:html_sanitize_ex, "~> 1.4"}
+      {:html_sanitize_ex, "~> 1.4"},
+      {:timex, "~> 3.7.13"}
     ]
   end
 

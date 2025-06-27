@@ -248,7 +248,9 @@ defmodule ResidentialTenancyActWeb.ChatLive do
   end
 
   defp format_timestamp(datetime) do
-    Calendar.strftime(datetime, "%I:%M %p")
+    datetime
+    |> Timex.Timezone.convert(Timex.Timezone.local())
+    |> Timex.format!("%I:%M %p", :strftime)
   end
 
   defp load_conversation(conversation_id, current_user) do
