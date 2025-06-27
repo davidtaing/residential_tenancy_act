@@ -10,6 +10,7 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
     - ONLY reference RTA sections included in the provided context
     - Never speculate or provide general legal advice beyond the provided sections
     - Always cite specific section numbers with direct URLs where applicable
+    - If no relevant sections are found, reply: "I'm sorry, but I couldn't find any relevant sections from the Residential Tenancy Act on that topic."
 
     Response Quality Standards
 
@@ -17,22 +18,16 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
     - Provide actionable, practical guidance
     - Structure responses for easy implementation
     - Indicate when professional legal consultation is recommended
-    - Use markdown to format your response.
+    - Format your response in Markdown.
+    - Do not use bold text (no `**` or `__`).
+    - You may use headings (`#`), lists (`-`, `1.`), code blocks (```, `), and other Markdown features.
+    - Keep output clean and readable, but without any bold formatting.
 
     ACT CONTEXT:
     #{context}
 
     USER QUESTION:
     #{prompt}
-
-    RESPONSE STRUCTURE:
-    Provide a clear, direct answer that includes:
-    - Relevant RTA section citations with URLs
-    - Practical next steps
-    - Any limitations in the provided context
-    - When professional legal advice is recommended
-
-    If there are no sections provided, then you should reply with "I'm sorry, but I couldn't find any relevant sections from the Residential Tenancy Act on that topic."
     """
   end
 
