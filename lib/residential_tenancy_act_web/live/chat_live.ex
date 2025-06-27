@@ -27,7 +27,7 @@ defmodule ResidentialTenancyActWeb.ChatLive do
       assign(socket,
         messages: messages,
         current_message: "",
-        loading: false,
+        status: :idle,
         selected_state: "NSW",
         sidebar_open: false,
         conversation_id: conversation_id,
@@ -47,7 +47,7 @@ defmodule ResidentialTenancyActWeb.ChatLive do
       assign(socket,
         messages: [],
         current_message: "",
-        loading: false,
+        status: :idle,
         selected_state: "NSW",
         sidebar_open: false,
         conversation_id: nil,
@@ -109,13 +109,17 @@ defmodule ResidentialTenancyActWeb.ChatLive do
   def handle_info({:chat_state_changed, :searching, _chat_state}, socket) do
     socket =
       socket
-      |> assign(loading: true)
+      |> assign(status: :searching)
 
     {:noreply, socket}
   end
 
   @impl true
   def handle_info({:chat_state_changed, :generating, _chat_state}, socket) do
+    socket =
+      socket
+      |> assign(status: :generating)
+
     {:noreply, socket}
   end
 
@@ -128,7 +132,7 @@ defmodule ResidentialTenancyActWeb.ChatLive do
     socket =
       socket
       |> assign(messages: messages)
-      |> assign(loading: false)
+      |> assign(status: :idle)
 
     {:noreply, socket}
   end
@@ -194,7 +198,6 @@ defmodule ResidentialTenancyActWeb.ChatLive do
       # Send the updated messages to the client immediately
       socket =
         socket
-        |> assign(loading: true)
         |> assign(messages: messages)
         |> assign(current_message: "")
 
@@ -216,15 +219,6 @@ defmodule ResidentialTenancyActWeb.ChatLive do
   @impl true
   def handle_event("toggle_sidebar", _params, socket) do
     {:noreply, assign(socket, sidebar_open: !socket.assigns.sidebar_open)}
-  end
-
-  @impl true
-  def handle_event("keydown", %{"key" => "Enter", "ctrlKey" => true}, socket) do
-    if String.trim(socket.assigns.current_message) != "" do
-      {:noreply, push_event(socket, "submit_form", %{})}
-    else
-      {:noreply, socket}
-    end
   end
 
   @impl true

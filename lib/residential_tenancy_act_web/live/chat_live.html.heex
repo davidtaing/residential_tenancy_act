@@ -108,7 +108,39 @@
     </div>
     
 <!-- Loading Indicator -->
-    <%= if @loading do %>
+    <%= if @status == :searching do %>
+      <div class="flex gap-4 px-6 pb-6">
+        <div class="max-w-4xl mx-auto w-full">
+          <div class="flex flex-col items-start max-w-md">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm bg-emerald-300 text-emerald-900">
+                🔍
+              </div>
+              <div class="px-6 py-3 rounded-2xl rounded-bl-md shadow-sm bg-white border border-emerald-300">
+                <div class="flex items-center gap-3">
+                  <div class="flex space-x-1">
+                    <div class="w-2 h-2 rounded-full animate-bounce bg-emerald-600"></div>
+                    <div
+                      class="w-2 h-2 rounded-full animate-bounce bg-emerald-600"
+                      style="animation-delay: 0.1s;"
+                    >
+                    </div>
+                    <div
+                      class="w-2 h-2 rounded-full animate-bounce bg-emerald-600"
+                      style="animation-delay: 0.2s;"
+                    >
+                    </div>
+                  </div>
+                  <span class="text-sm text-emerald-800">Searching the Residential Tenancy Act for relevant sections...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <%= if @status == :generating do %>
       <div class="flex gap-4 px-6 pb-6">
         <div class="max-w-4xl mx-auto w-full">
           <div class="flex flex-col items-start max-w-md">
@@ -140,6 +172,7 @@
       </div>
     <% end %>
     
+    
 <!-- Input Area -->
     <div class="p-6 bg-white border-t border-emerald-300">
       <div class="max-w-4xl mx-auto">
@@ -150,13 +183,11 @@
               name="message"
               value={@current_message}
               phx-keydown="keydown"
-              phx-ignore
               placeholder="Ask me about tenancy laws..."
               class="w-full resize-none px-4 py-4 rounded-xl border border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 text-sm bg-emerald-100 text-emerald-900 placeholder-emerald-600 min-h-[60px]"
               rows="3"
               maxlength="1000"
               phx-hook="AutoResize"
-              phx-update="ignore"
             ></textarea>
             <button
               type="submit"
