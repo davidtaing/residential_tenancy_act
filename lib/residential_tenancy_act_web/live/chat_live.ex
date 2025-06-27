@@ -148,13 +148,13 @@ defmodule ResidentialTenancyActWeb.ChatLive do
   end
 
   @impl true
-  def handle_info({:generate_title, conversation_id, current_user}, socket) do
+  def handle_info({:generate_title, conversation_id}, socket) do
+    current_user = socket.assigns.current_user
     conversation = Chatbot.generate_title(conversation_id, current_user)
 
     socket =
       socket
       |> assign(conversation: conversation)
-
 
     {:noreply, socket}
   end
@@ -201,7 +201,7 @@ defmodule ResidentialTenancyActWeb.ChatLive do
       if messages == [] do
         send(
           self(),
-          {:generate_title, user_message, socket.assigns.conversation_id, current_user}
+          {:generate_title, socket.assigns.conversation_id}
         )
       end
 
