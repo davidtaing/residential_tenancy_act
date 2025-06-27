@@ -17,11 +17,15 @@ defmodule ResidentialTenancyAct.Chatbot do
     last_message = List.last(messages)
     user_prompt = last_message.content
 
+    Logger.info("Chatbot: Searching for relevant sections", conversation_id: metadata.conversation_id)
+
     ChatStateServer.change_to_searching(chat_server_pid, user_prompt)
 
     # perform RAG search
     context = perform_rag_search(last_message)
     ChatStateServer.change_to_generating(chat_server_pid, context)
+
+    Logger.info("Chatbot: Found relevant sections")
 
     # build master prompt with context
     master_prompt = Prompts.build_rta_prompt(user_prompt, context)
@@ -41,6 +45,8 @@ defmodule ResidentialTenancyAct.Chatbot do
     # Invoke LLM
     {:ok, %{text: response, usage: usage}} = LLM.generate_text_response(messages, metadata)
 
+    Logger.info("Chatbot: LLM response generated")
+
     # Update token history
     token_history = %{
       conversation_id: last_message.conversation_id,
@@ -52,7 +58,7 @@ defmodule ResidentialTenancyAct.Chatbot do
     |> Ash.Changeset.for_create(:create, token_history, actor: current_user)
     |> Ash.create!()
 
-    Logger.info("Token History Updated", token_history: token_history)
+    Logger.info("Chatbot: Token History Updated", token_history: token_history)
 
     # Create response message
     response_message = Messages
@@ -62,6 +68,8 @@ defmodule ResidentialTenancyAct.Chatbot do
       conversation_id: last_message.conversation_id,
     }, actor: current_user)
     |> Ash.create!()
+
+    Logger.info("Chatbot: Response message created")
 
     ChatStateServer.change_to_responding(chat_server_pid, response_message)
 
