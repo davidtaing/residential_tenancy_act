@@ -30,7 +30,7 @@ defmodule ResidentialTenancyAct.ChatStateServer do
   @doc """
   Change to :responding state with generated response.
   """
-  @spec change_to_responding(pid(), String.t()) :: :ok
+  @spec change_to_responding(pid(), Messages.t()) :: :ok
   def change_to_responding(pid, response) do
     GenServer.cast(pid, {:change_state, :responding, response})
   end
