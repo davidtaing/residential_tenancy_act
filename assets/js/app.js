@@ -29,10 +29,15 @@ const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute
 // Auto-resize hook for textarea
 const AutoResize = {
   mounted() {
-    this.el.addEventListener('input', () => {
-      this.el.style.height = 'auto';
-      this.el.style.height = Math.min(this.el.scrollHeight, 120) + 'px';
-    });
+    this.resize();
+    this.el.addEventListener('input', () => this.resize());
+  },
+  updated() {
+    this.resize();
+  },
+  resize() {
+    this.el.style.height = 'auto';
+    this.el.style.height = Math.min(this.el.scrollHeight, 120) + 'px';
   }
 };
 
