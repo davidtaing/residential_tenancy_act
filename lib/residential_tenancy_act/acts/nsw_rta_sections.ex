@@ -8,6 +8,12 @@ defmodule ResidentialTenancyAct.Acts.NSWRTASections do
     schema "rtas"
     table "nsw_rta_sections"
     repo ResidentialTenancyAct.Repo
+
+
+    custom_indexes do
+      index :embeddings, using: "hnsw (embeddings vector_cosine_ops)"
+    end
+
   end
 
   actions do
