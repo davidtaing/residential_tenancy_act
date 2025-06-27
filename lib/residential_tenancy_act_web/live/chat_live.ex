@@ -121,7 +121,7 @@ defmodule ResidentialTenancyActWeb.ChatLive do
 
   @impl true
   def handle_info({:chat_state_changed, :responding, chat_state}, socket) do
-    message = chat_state.message
+    message = chat_state.response
 
     messages = socket.assigns.messages ++ [message]
 
