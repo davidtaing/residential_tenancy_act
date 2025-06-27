@@ -47,7 +47,7 @@
     
 <!-- State Selection Bar -->
     <div class="px-6 py-3 bg-emerald-900 text-white">
-      <div class="max-w-4xl mx-auto flex items-center gap-3">
+      <div class="mx-auto flex items-center gap-3">
         <span class="text-sm font-medium">State:</span>
         <select
           name="state"
@@ -94,9 +94,9 @@
               </div>
             <% else %>
               <div id={"message-#{message.id}"} class="flex flex-col items-start">
-                <p class="text-sm leading-relaxed text-emerald-900 whitespace-pre-wrap">
-                  {message.content}
-                </p>
+                <div class="max-w-none text-emerald-900">
+                  <%= render_markdown(message.content) %>
+                </div>
                 <span class="text-xs mt-1 text-emerald-700 opacity-70">
                   {format_timestamp(message.created_at)}
                 </span>

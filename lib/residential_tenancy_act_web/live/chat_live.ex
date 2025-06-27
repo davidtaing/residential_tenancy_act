@@ -6,6 +6,8 @@ defmodule ResidentialTenancyActWeb.ChatLive do
   require Ash.Query
   require Logger
 
+  import ResidentialTenancyActWeb.MarkdownHelper, only: [render_markdown: 1]
+
   alias ResidentialTenancyActWeb.ChatLive.SidebarComponent
   alias ResidentialTenancyAct.Chat.Conversations
   alias ResidentialTenancyAct.Chat.Messages
@@ -32,9 +34,6 @@ defmodule ResidentialTenancyActWeb.ChatLive do
         conversation: conversation
       )
 
-    IO.inspect(socket.assigns.messages,
-      label: "Messages in mount for conversation #{conversation_id}"
-    )
 
     {:ok, socket}
   end
