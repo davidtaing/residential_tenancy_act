@@ -3,7 +3,8 @@ defmodule ResidentialTenancyActWeb.MarkdownHelper do
   Helper module for rendering markdown content in the chat interface.
   """
 
-  @max_input_size 50_000  # 50KB limit to prevent resource exhaustion
+  # 50KB limit to prevent resource exhaustion
+  @max_input_size 50_000
 
   @doc """
   Converts markdown text to HTML with custom styling for the chat interface.
@@ -48,14 +49,32 @@ defmodule ResidentialTenancyActWeb.MarkdownHelper do
     |> String.replace("<li>", "<li class=\"text-sm\">")
     |> String.replace("<strong>", "<strong class=\"font-semibold text-emerald-900\">")
     |> String.replace("<em>", "<em class=\"italic\">")
-    |> String.replace("<code>", "<code class=\"bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded text-xs font-mono\">")
-    |> String.replace("<pre>", "<pre class=\"bg-emerald-50 border border-emerald-200 rounded-md p-3 mb-3 overflow-x-auto\">")
-    |> String.replace("<pre class=\"", "<pre class=\"bg-emerald-50 border border-emerald-200 rounded-md p-3 mb-3 overflow-x-auto ")
-    |> String.replace("<blockquote>", "<blockquote class=\"border-l-4 border-emerald-300 pl-4 py-2 mb-3 bg-emerald-50 italic\">")
+    |> String.replace(
+      "<code>",
+      "<code class=\"bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded text-xs font-mono\">"
+    )
+    |> String.replace(
+      "<pre>",
+      "<pre class=\"bg-emerald-50 border border-emerald-200 rounded-md p-3 mb-3 overflow-x-auto\">"
+    )
+    |> String.replace(
+      "<pre class=\"",
+      "<pre class=\"bg-emerald-50 border border-emerald-200 rounded-md p-3 mb-3 overflow-x-auto "
+    )
+    |> String.replace(
+      "<blockquote>",
+      "<blockquote class=\"border-l-4 border-emerald-300 pl-4 py-2 mb-3 bg-emerald-50 italic\">"
+    )
     |> String.replace("<hr>", "<hr class=\"border-emerald-300 my-4\">")
     |> String.replace("<a ", "<a class=\"text-emerald-700 underline hover:text-emerald-900\" ")
-    |> String.replace("<table>", "<table class=\"border-collapse border border-emerald-300 mb-3 w-full\">")
-    |> String.replace("<th>", "<th class=\"border border-emerald-300 px-3 py-2 bg-emerald-100 text-left font-semibold\">")
+    |> String.replace(
+      "<table>",
+      "<table class=\"border-collapse border border-emerald-300 mb-3 w-full\">"
+    )
+    |> String.replace(
+      "<th>",
+      "<th class=\"border border-emerald-300 px-3 py-2 bg-emerald-100 text-left font-semibold\">"
+    )
     |> String.replace("<td>", "<td class=\"border border-emerald-300 px-3 py-2\">")
   end
 end

@@ -95,7 +95,7 @@
             <% else %>
               <div id={"message-#{message.id}"} class="flex flex-col items-start">
                 <div class="max-w-none text-emerald-900">
-                  <%= render_markdown(message.content) %>
+                  {render_markdown(message.content)}
                 </div>
                 <span class="text-xs mt-1 text-emerald-700 opacity-70">
                   {format_timestamp(message.created_at)}
@@ -254,7 +254,8 @@
   }
 </script>
 
-<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js">
+</script>
 <script>
   kofiWidgetOverlay.draw('teeang', {
     'type': 'floating-chat',

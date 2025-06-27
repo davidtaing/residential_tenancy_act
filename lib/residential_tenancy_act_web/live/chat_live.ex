@@ -17,6 +17,7 @@ defmodule ResidentialTenancyActWeb.ChatLive do
   @impl true
   def mount(%{"conversation_id" => conversation_id}, _session, socket) do
     current_user = socket.assigns.current_user
+
     {:ok, %{conversation: conversation, messages: messages}} =
       load_conversation(conversation_id, current_user)
 
@@ -33,7 +34,6 @@ defmodule ResidentialTenancyActWeb.ChatLive do
         conversation: conversation,
         server_pid: server_pid
       )
-
 
     {:ok, socket}
   end
@@ -94,7 +94,12 @@ defmodule ResidentialTenancyActWeb.ChatLive do
         user_id: socket.assigns.current_user.id
       }
 
-      Chatbot.generate_response(socket.assigns.server_pid, messages, socket.assigns.current_user, metadata)
+      Chatbot.generate_response(
+        socket.assigns.server_pid,
+        messages,
+        socket.assigns.current_user,
+        metadata
+      )
     end)
 
     {:noreply, socket}
@@ -102,8 +107,9 @@ defmodule ResidentialTenancyActWeb.ChatLive do
 
   @impl true
   def handle_info({:chat_state_changed, :searching, _chat_state}, socket) do
-    socket = socket
-    |> assign(loading: true)
+    socket =
+      socket
+      |> assign(loading: true)
 
     {:noreply, socket}
   end
@@ -119,9 +125,10 @@ defmodule ResidentialTenancyActWeb.ChatLive do
 
     messages = socket.assigns.messages ++ [message]
 
-    socket = socket
-    |> assign(messages: messages)
-    |> assign(loading: false)
+    socket =
+      socket
+      |> assign(messages: messages)
+      |> assign(loading: false)
 
     {:noreply, socket}
   end
@@ -192,7 +199,10 @@ defmodule ResidentialTenancyActWeb.ChatLive do
         |> assign(current_message: "")
 
       # Generate assistant response asynchronously
-      send(self(), {:generate_response, messages, conversation_id: socket.assigns.conversation_id})
+      send(
+        self(),
+        {:generate_response, messages, conversation_id: socket.assigns.conversation_id}
+      )
 
       {:noreply, socket}
     end
@@ -207,7 +217,6 @@ defmodule ResidentialTenancyActWeb.ChatLive do
   def handle_event("toggle_sidebar", _params, socket) do
     {:noreply, assign(socket, sidebar_open: !socket.assigns.sidebar_open)}
   end
-
 
   @impl true
   def handle_event("keydown", %{"key" => "Enter", "ctrlKey" => true}, socket) do
@@ -225,8 +234,9 @@ defmodule ResidentialTenancyActWeb.ChatLive do
 
   @impl true
   def handle_event("keydown", %{"value" => value}, socket) do
-    socket = socket
-    |> assign(current_message: value)
+    socket =
+      socket
+      |> assign(current_message: value)
 
     {:noreply, socket}
   end
