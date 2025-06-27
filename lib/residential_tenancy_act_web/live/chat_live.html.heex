@@ -12,35 +12,37 @@
   <div class="flex-1 flex flex-col">
     <!-- Header -->
     <div class="px-6 py-4 bg-emerald-950 text-white">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <button
-            class="p-2 hover:bg-emerald-800 rounded-md transition-colors"
-            phx-click="toggle_sidebar"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              >
-              </path>
-            </svg>
-          </button>
-          <div>
-            <h1 class="text-2xl font-light tracking-wide">TenancyBot</h1>
-            <p class="text-sm text-emerald-300 font-light">Your tenancy law assistant</p>
+      <div class="max-w-4xl mx-auto">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <button
+              class="p-2 hover:bg-emerald-800 rounded-md transition-colors"
+              phx-click="toggle_sidebar"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                >
+                </path>
+              </svg>
+            </button>
+            <div>
+              <h1 class="text-2xl font-light tracking-wide">TenancyBot</h1>
+              <p class="text-sm text-emerald-300 font-light">Your tenancy law assistant</p>
+            </div>
           </div>
-        </div>
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-emerald-300">Signed in as</span>
-            <span class="text-sm font-medium">{@current_user.email}</span>
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-emerald-300">Signed in as</span>
+              <span class="text-sm font-medium">{@current_user.email}</span>
+            </div>
+            <a href="/sign-out" class="text-sm text-emerald-300 hover:text-white transition-colors">
+              Sign out
+            </a>
           </div>
-          <a href="/sign-out" class="text-sm text-emerald-300 hover:text-white transition-colors">
-            Sign out
-          </a>
         </div>
       </div>
     </div>
@@ -107,34 +109,29 @@
           </div>
         <% else %>
           <%= for message <- @messages do %>
-            <div id={"message-#{message.id}"} class="flex gap-4">
-              <%= if message.role == :user do %>
+            <%= if message.role == :user do %>
+              <div id={"message-#{message.id}"} class="flex gap-4">
                 <!-- User Message -->
                 <div class="flex-1"></div>
                 <div class="flex flex-col items-end max-w-md">
                   <div class="px-6 py-3 rounded-2xl rounded-br-md shadow-sm bg-emerald-700 text-white">
                     <p class="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                   </div>
-                  <span class="text-xs mt-2 text-emerald-700 opacity-70">
+                  <span class="text-xs my-2 text-emerald-700 opacity-70">
                     {format_timestamp(message.created_at)}
                   </span>
                 </div>
-              <% else %>
-                <!-- Assistant Message -->
-                <div class="w-full py-10">
-                  <div class="flex items-start gap-3 mb-2">
-                    <span class="text-xs text-emerald-700 opacity-70">
-                      {format_timestamp(message.created_at)}
-                    </span>
-                  </div>
-                  <div>
-                    <p class="text-sm leading-relaxed text-emerald-900 whitespace-pre-wrap">
-                      {message.content}
-                    </p>
-                  </div>
-                </div>
-              <% end %>
-            </div>
+              </div>
+            <% else %>
+              <div id={"message-#{message.id}"} class="flex flex-col items-start">
+                <p class="text-sm leading-relaxed text-emerald-900 whitespace-pre-wrap">
+                  {message.content}
+                </p>
+                <span class="text-xs mt-1 text-emerald-700 opacity-70">
+                  {format_timestamp(message.created_at)}
+                </span>
+              </div>
+            <% end %>
           <% end %>
         <% end %>
       </div>

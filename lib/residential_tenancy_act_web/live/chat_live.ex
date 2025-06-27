@@ -3,151 +3,215 @@ defmodule ResidentialTenancyActWeb.ChatLive do
 
   on_mount {ResidentialTenancyActWeb.LiveUserAuth, :live_user_required}
 
+  require Ash.Query
+  require Logger
+
   alias ResidentialTenancyActWeb.ChatLive.SidebarComponent
+  alias ResidentialTenancyAct.Chat.Conversations
+  alias ResidentialTenancyAct.Chat.Messages
+  alias ResidentialTenancyAct.Chat.TokenHistory
+  alias ResidentialTenancyAct.LLM
+  alias ResidentialTenancyAct.LLM.Prompts
+  alias ResidentialTenancyAct.Acts.RTASections
 
   @impl true
   def mount(%{"conversation_id" => conversation_id}, _session, socket) do
+    current_user = socket.assigns.current_user
     # Load conversation by ID
-    conversation = load_conversation(conversation_id)
+    {:ok, %{conversation: conversation, messages: messages}} =
+      load_conversation(conversation_id, current_user)
 
-    socket = assign(socket,
-      messages: conversation.messages,
-      current_message: "",
-      loading: false,
-      selected_state: "NSW",
-      sidebar_open: false,
-      conversation_id: conversation_id
+    socket =
+      assign(socket,
+        messages: messages,
+        current_message: "",
+        loading: false,
+        selected_state: "NSW",
+        sidebar_open: false,
+        conversation_id: conversation_id,
+        conversation: conversation
+      )
+
+    IO.inspect(socket.assigns.messages,
+      label: "Messages in mount for conversation #{conversation_id}"
     )
 
-    IO.inspect(socket.assigns.messages, label: "Messages in mount for conversation #{conversation_id}")
     {:ok, socket}
   end
 
   @impl true
   def mount(_params, _session, socket) do
     # Default mount for new conversations
-    fake_messages = [
-      %{
-        id: 1,
-        content: "Hi! I'm having issues with my landlord not fixing a leaking tap. What are my rights?",
-        role: :user,
-        timestamp: DateTime.utc_now() |> DateTime.add(-7200, :second)
-      },
-      %{
-        id: 2,
-        content: "Under NSW tenancy law, landlords are required to maintain the property in a reasonable state of repair. A leaking tap would generally be considered an urgent repair that needs to be fixed within a reasonable time.\n\nYou should:\n1. Notify your landlord in writing about the issue\n2. Give them a reasonable time to fix it (usually 14 days for non-urgent repairs)\n3. If they don't respond, you can apply to the NSW Civil and Administrative Tribunal (NCAT)\n\nWould you like me to help you draft a formal request to your landlord?",
-        role: :assistant,
-        timestamp: DateTime.utc_now() |> DateTime.add(-7100, :second)
-      },
-      %{
-        id: 3,
-        content: "Thanks! How much notice do I need to give if I want to move out?",
-        role: :user,
-        timestamp: DateTime.utc_now() |> DateTime.add(-5400, :second)
-      },
-      %{
-        id: 4,
-        content: "In NSW, the notice period depends on your lease type:\n\n• **Fixed-term lease**: You can give notice 14 days before the end of the lease\n• **Periodic lease (month-to-month)**: You need to give 21 days written notice\n• **Breaking a fixed-term lease early**: You may need to pay compensation\n\nMake sure to give notice in writing and keep a copy. Would you like me to explain more about breaking a lease early?",
-        role: :assistant,
-        timestamp: DateTime.utc_now() |> DateTime.add(-5300, :second)
-      },
-      %{
-        id: 5,
-        content: "What about rent increases? How often can my landlord raise the rent?",
-        role: :user,
-        timestamp: DateTime.utc_now() |> DateTime.add(-3600, :second)
-      },
-      %{
-        id: 6,
-        content: "In NSW, rent increases are regulated under the Residential Tenancies Act 2010:\n\n• **Frequency**: Rent can only be increased once every 12 months\n• **Notice**: You must receive at least 60 days written notice before a rent increase\n• **Reasonableness**: The increase must be reasonable compared to market rates\n• **Fixed-term leases**: Rent cannot be increased during a fixed-term lease unless specified in the agreement\n\nIf you believe a rent increase is excessive, you can apply to NCAT within 30 days of receiving the notice. The tribunal will consider factors like:\n- Current market rents for similar properties\n- The condition of the property\n- Any improvements made to the property\n- The landlord's costs and expenses",
-        role: :assistant,
-        timestamp: DateTime.utc_now() |> DateTime.add(-3500, :second)
-      },
-      %{
-        id: 7,
-        content: "Can my landlord enter my property without permission?",
-        role: :user,
-        timestamp: DateTime.utc_now() |> DateTime.add(-1800, :second)
-      },
-      %{
-        id: 8,
-        content: "No, your landlord cannot enter your property without proper notice and permission, except in emergencies. Here are the rules:\n\n**Entry with notice (7-14 days):**\n• Routine inspections (maximum 4 per year)\n• Repairs and maintenance\n• Showing the property to prospective tenants or buyers\n• Valuations\n\n**Entry with 2 days notice:**\n• Emergency repairs\n• Health and safety inspections\n\n**No notice required:**\n• Genuine emergencies (fire, flood, gas leak)\n• When you've abandoned the property\n\nYour landlord must:\n- Give written notice specifying the reason and date/time\n- Only enter during reasonable hours (usually 8am-8pm)\n- Not stay longer than necessary\n- Respect your privacy and quiet enjoyment\n\nIf your landlord enters without proper notice, you can complain to NSW Fair Trading or apply to NCAT.",
-        role: :assistant,
-        timestamp: DateTime.utc_now() |> DateTime.add(-1700, :second)
-      },
-      %{
-        id: 9,
-        content: "What happens if I can't pay my rent on time?",
-        role: :user,
-        timestamp: DateTime.utc_now() |> DateTime.add(-900, :second)
-      },
-      %{
-        id: 10,
-        content: "If you're having trouble paying rent, it's important to act quickly:\n\n**Immediate steps:**\n1. Contact your landlord or agent as soon as possible\n2. Explain your situation and when you expect to pay\n3. Ask about payment plans or extensions\n4. Keep records of all communications\n\n**Your rights:**\n• You cannot be evicted for being 1-2 weeks late\n• Your landlord must give you a termination notice\n• You have time to catch up on payments\n• You can apply to NCAT for more time if needed\n\n**Getting help:**\n• Contact NSW Fair Trading for advice\n• Apply for rental assistance through Centrelink\n• Contact financial counseling services\n• Check if you're eligible for emergency housing assistance\n\n**Avoiding eviction:**\n• Pay what you can, even if it's partial payment\n• Keep your landlord informed of your situation\n• Consider a payment plan\n• Seek help from support services early",
-        role: :assistant,
-        timestamp: DateTime.utc_now() |> DateTime.add(-800, :second)
-      },
-      %{
-        id: 11,
-        content: "Thanks for all the help! This has been really useful.",
-        role: :user,
-        timestamp: DateTime.utc_now() |> DateTime.add(-300, :second)
-      },
-      %{
-        id: 12,
-        content: "You're very welcome! I'm glad I could help you understand your tenancy rights. Remember, if you have any other questions about your tenancy or need help with specific situations, feel free to ask. It's always good to know your rights and obligations as a tenant.\n\nIf you need to take any formal action or have complex legal questions, I'd recommend:\n• Contacting NSW Fair Trading\n• Speaking with a tenant advocacy service\n• Getting legal advice for complex matters\n\nGood luck with your tenancy!",
-        role: :assistant,
-        timestamp: DateTime.utc_now() |> DateTime.add(-200, :second)
-      }
-    ]
+    socket =
+      assign(socket,
+        messages: [],
+        current_message: "",
+        loading: false,
+        selected_state: "NSW",
+        sidebar_open: false,
+        conversation_id: nil,
+        conversation: nil
+      )
 
-    socket = assign(socket,
-      messages: fake_messages,
-      current_message: "",
-      loading: false,
-      selected_state: "NSW",
-      sidebar_open: false,
-      conversation_id: nil
-    )
-
-    IO.inspect(socket.assigns.messages, label: "Messages in mount")
     {:ok, socket}
   end
 
   @impl true
-  @spec handle_event(<<_::56, _::_*8>>, any(), any()) :: {:noreply, any()}
+  def handle_params(%{"conversation_id" => _conversation_id}, _url, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_params(%{}, _url, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:create_conversation, socket) do
+    current_user = socket.assigns.current_user
+
+    conversation =
+      Conversations
+      |> Ash.Changeset.for_create(:create, %{user_id: current_user.id})
+      |> Ash.create!(actor: current_user)
+
+    socket =
+      socket
+      |> assign(conversation: conversation)
+      |> assign(conversation_id: conversation.id)
+      |> push_patch(to: ~p"/chat/#{conversation.id}", replace: true)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("send_message", %{"message" => message}, socket) do
-    if String.trim(message) != "" do
-      # Add user message to the chat
-      user_message = %{
-        id: System.unique_integer([:positive]),
-        content: message,
-        role: :user,
-        timestamp: DateTime.utc_now()
-      }
-
-      # Add bot response placeholder (this will be replaced with actual logic later)
-      bot_message = %{
-        id: System.unique_integer([:positive]),
-        content: "This is a placeholder response. The business logic will be wired up later!",
-        role: :assistant,
-        timestamp: DateTime.utc_now()
-      }
-
-      {:noreply,
-       socket
-       |> assign(messages: socket.assigns.messages ++ [user_message, bot_message])
-       |> assign(current_message: "")
-       |> assign(loading: false)}
+    if String.trim(message) == "" do
+      {:noreply, socket}
     else
+      current_user = socket.assigns.current_user
+      messages = socket.assigns.messages
+      conversation = socket.assigns.conversation
+
+      socket =
+        if messages == [] && conversation == nil do
+          conversation =
+            Conversations
+            |> Ash.Changeset.for_create(:create, %{}, actor: current_user)
+            |> Ash.create!()
+
+          socket
+          |> assign(conversation: conversation)
+          |> assign(conversation_id: conversation.id)
+          |> push_patch(to: ~p"/chat/#{conversation.id}", replace: true)
+        else
+          socket
+        end
+
+      # Create user message
+      user_message =
+        Messages
+        |> Ash.Changeset.for_create(
+          :create,
+          %{
+            content: message,
+            role: :user,
+            conversation_id: socket.assigns.conversation_id
+          },
+          actor: current_user
+        )
+        |> Ash.create!()
+
+      # Update conversation title if this is the first message
+      if messages == [] do
+        send(
+          self(),
+          {:generate_title, user_message, socket.assigns.conversation_id, current_user}
+        )
+      end
+
+      # Show loading state
+      socket = assign(socket, loading: true)
+
+      # Send the updated messages to the client immediately
+      socket =
+        socket
+        |> assign(messages: messages ++ [user_message])
+        |> assign(current_message: "")
+
+      # Generate assistant response asynchronously
+      send(self(), {:generate_response, message, socket.assigns.conversation_id})
+
       {:noreply, socket}
     end
   end
 
   @impl true
-  def handle_event("update_message", %{"value" => message}, socket) do
-    {:noreply, assign(socket, current_message: message)}
+  def handle_info({:generate_title, user_message, conversation_id, current_user}, socket) do
+    case generate_title(user_message.content, conversation_id) do
+      {:ok, title} ->
+        conversation_to_update = Conversations |> Ash.get!(conversation_id, actor: current_user)
+
+        Conversations
+        |> Ash.Changeset.for_update(:update, %{title: title}, actor: current_user)
+        |> Ash.update!(conversation_to_update)
+
+        {:noreply, socket}
+
+      {:error, _error} ->
+        # Fallback to simple title generation
+        title = generate_conversation_title(user_message)
+        conversation_to_update = Conversations |> Ash.get!(conversation_id, actor: current_user)
+
+        Conversations
+        |> Ash.Changeset.for_update(:update, %{title: title}, actor: current_user)
+        |> Ash.update!(conversation_to_update)
+
+        {:noreply, socket}
+    end
   end
+
+  @impl true
+  def handle_info({:generate_response, user_message, conversation_id}, socket) do
+    current_user = socket.assigns.current_user
+
+    case generate_response(user_message, conversation_id, current_user) do
+      {:ok, assistant_message} ->
+        socket =
+          socket
+          |> assign(messages: socket.assigns.messages ++ [assistant_message])
+          |> assign(loading: false)
+
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.error("Failed to generate assistant response", error: error)
+
+        # Create error message
+        error_message =
+          Messages
+          |> Ash.Changeset.for_create(
+            :create,
+            %{
+              content:
+                "I'm sorry, I encountered an error while processing your request. Please try again.",
+              role: :assistant,
+              conversation_id: conversation_id,
+              user_id: current_user.id
+            },
+            actor: current_user
+          )
+          |> Ash.create!()
+
+        socket =
+          socket
+          |> assign(messages: socket.assigns.messages ++ [error_message])
+          |> assign(loading: false)
+
+        {:noreply, socket}
+    end
+  end
+
 
   @impl true
   def handle_event("change_state", %{"state" => state}, socket) do
@@ -166,19 +230,19 @@ defmodule ResidentialTenancyActWeb.ChatLive do
         socket
       ) do
     if String.trim(socket.assigns.current_message) != "" do
-      send(self(), {:send_message, socket.assigns.current_message})
+      {:noreply, push_event(socket, "submit_form", %{})}
+    else
+      {:noreply, socket}
     end
-
-    {:noreply, socket}
   end
 
   @impl true
   def handle_event("keydown", %{"key" => "Enter", "ctrlKey" => true}, socket) do
     if String.trim(socket.assigns.current_message) != "" do
-      send(self(), {:send_message, socket.assigns.current_message})
+      {:noreply, push_event(socket, "submit_form", %{})}
+    else
+      {:noreply, socket}
     end
-
-    {:noreply, socket}
   end
 
   @impl true
@@ -186,79 +250,172 @@ defmodule ResidentialTenancyActWeb.ChatLive do
     {:noreply, socket}
   end
 
-  @impl true
-  def handle_info({:send_message, message}, socket) do
-    # Add user message to the chat
-    user_message = %{
-      id: System.unique_integer([:positive]),
-      content: message,
-      role: :user,
-      timestamp: DateTime.utc_now()
-    }
-
-    # Add bot response placeholder
-    bot_message = %{
-      id: System.unique_integer([:positive]),
-      content: "This is a placeholder response. The business logic will be wired up later!",
-      role: :assistant,
-      timestamp: DateTime.utc_now()
-    }
-
-    {:noreply,
-     socket
-     |> assign(messages: socket.assigns.messages ++ [user_message, bot_message])
-     |> assign(current_message: "")
-     |> assign(loading: false)}
-  end
-
   defp format_timestamp(datetime) do
     Calendar.strftime(datetime, "%I:%M %p")
   end
 
-  defp load_conversation(conversation_id) do
-    # For now, return fake data. This would be replaced with actual database queries
-    case conversation_id do
-      "1" -> %{
-        id: "1",
-        title: "Tenancy Rights Discussion",
-        messages: [
-          %{
-            id: 1,
-            content: "Hi! I'm having issues with my landlord not fixing a leaking tap. What are my rights?",
-            role: :user,
-            timestamp: DateTime.utc_now() |> DateTime.add(-7200, :second)
-          },
-          %{
-            id: 2,
-            content: "Under NSW tenancy law, landlords are required to maintain the property in a reasonable state of repair. A leaking tap would generally be considered an urgent repair that needs to be fixed within a reasonable time.\n\nYou should:\n1. Notify your landlord in writing about the issue\n2. Give them a reasonable time to fix it (usually 14 days for non-urgent repairs)\n3. If they don't respond, you can apply to the NSW Civil and Administrative Tribunal (NCAT)\n\nWould you like me to help you draft a formal request to your landlord?",
-            role: :assistant,
-            timestamp: DateTime.utc_now() |> DateTime.add(-7100, :second)
-          }
-        ]
+  defp load_conversation(conversation_id, current_user) do
+    conversation =
+      Conversations
+      |> Ash.get!(conversation_id, actor: current_user)
+
+    messages =
+      Messages
+      |> Ash.Query.filter(conversation_id: conversation_id)
+      |> Ash.Query.sort(created_at: :asc)
+      |> Ash.read!(actor: current_user)
+
+    {:ok,
+     %{
+       conversation: conversation,
+       messages: messages
+     }}
+  end
+
+  defp generate_conversation_title(message) do
+    content =
+      message.content
+      |> String.trim()
+      |> String.slice(0, 50)
+
+    if String.length(content) == 50 do
+      content <> "..."
+    else
+      content
+    end
+  end
+
+  defp generate_response(user_message, conversation_id, current_user) do
+    try do
+      # Generate embeddings for the user message
+      case LLM.generate_embeddings(user_message) do
+        {:ok, embeddings} ->
+          # Search for relevant RTA sections
+          relevant_sections = RTASections.similarity_search(:nsw, embeddings)
+
+          # Build context from relevant sections
+          context = build_context_from_sections(relevant_sections)
+
+          # Build the prompt
+          prompt = Prompts.build_rta_prompt(user_message, context)
+
+          # Convert conversation history to AWS format
+          conversation_messages = get_conversation_messages(conversation_id, current_user)
+
+          aws_messages =
+            conversation_messages
+            |> Messages.to_aws_messages()
+            |> Enum.drop(-1)
+            |> Enum.take(-6)
+            |> then(&(&1 ++ [%{role: :user, content: prompt}]))
+
+          # Generate response using LLM
+          case LLM.generate_text_response(aws_messages) do
+            {:ok, %{text: response_text, usage: usage}} ->
+              # Create assistant message
+              assistant_message =
+                Messages
+                |> Ash.Changeset.for_create(
+                  :create,
+                  %{
+                    content: response_text,
+                    role: :assistant,
+                    conversation_id: conversation_id,
+                    user_id: current_user.id
+                  },
+                  actor: current_user
+                )
+                |> Ash.create!()
+
+              # Update token history
+              TokenHistory
+              |> Ash.Changeset.for_create(
+                :create,
+                %{
+                  conversation_id: conversation_id,
+                  input_tokens: usage["inputTokenCount"],
+                  output_tokens: usage["outputTokenCount"],
+                },
+                actor: current_user
+              )
+              |> Ash.create!()
+
+              {:ok, assistant_message}
+
+            {:error, error} ->
+              Logger.error("LLM response generation failed", error: error)
+              {:error, error}
+          end
+
+        {:error, error} ->
+          Logger.error("Embedding generation failed", error: error)
+          {:error, error}
+      end
+    rescue
+      error ->
+        Logger.error("Error in generate_response", error: error)
+        {:error, error}
+    end
+  end
+
+  defp build_context_from_sections(sections) do
+    sections
+    |> Enum.map(fn section ->
+      """
+      Section #{section.id}: #{section.title}
+      URL: #{section.url}
+
+      #{section.text}
+
+      ---
+      """
+    end)
+    |> Enum.join("\n")
+  end
+
+  defp get_conversation_messages(conversation_id, current_user) do
+    Messages
+    |> Ash.Query.filter(conversation_id: conversation_id)
+    |> Ash.Query.sort(created_at: :asc)
+    |> Ash.read!(actor: current_user)
+  end
+
+  defp generate_title(user_message, conversation_id) do
+    try do
+      prompt = Prompts.build_title_prompt(user_message)
+
+      # Create a simple message for title generation
+      title_message = %ResidentialTenancyAct.LLM.AWSNovaRequest.Message{
+        role: :user,
+        content: [%ResidentialTenancyAct.LLM.AWSNovaRequest.TextContent{text: prompt}]
       }
-      "2" -> %{
-        id: "2",
-        title: "Rent Increase Questions",
-        messages: [
-          %{
-            id: 1,
-            content: "What about rent increases? How often can my landlord raise the rent?",
-            role: :user,
-            timestamp: DateTime.utc_now() |> DateTime.add(-3600, :second)
-          },
-          %{
-            id: 2,
-            content: "In NSW, rent increases are regulated under the Residential Tenancies Act 2010:\n\n• **Frequency**: Rent can only be increased once every 12 months\n• **Notice**: You must receive at least 60 days written notice before a rent increase\n• **Reasonableness**: The increase must be reasonable compared to market rates\n• **Fixed-term leases**: Rent cannot be increased during a fixed-term lease unless specified in the agreement",
-            role: :assistant,
-            timestamp: DateTime.utc_now() |> DateTime.add(-3500, :second)
-          }
-        ]
-      }
-      _ -> %{
-        id: conversation_id,
-        title: "Conversation #{conversation_id}",
-        messages: []
-      }
+
+      case LLM.generate_text_response([title_message]) do
+        {:ok, title} ->
+          # Clean up the title
+          title = title |> String.trim() |> String.replace("\"", "")
+
+          # Update token history
+          TokenHistory
+          |> Ash.Changeset.for_create(
+            :create,
+            %{
+              conversation_id: conversation_id,
+              input_tokens: title.usage["inputTokenCount"],
+              output_tokens: title.usage["outputTokenCount"],
+            }
+          )
+          |> Ash.create!()
+          {:ok, title}
+
+        {:error, error} ->
+          Logger.error("Title generation failed", error: error)
+          {:error, error}
+      end
+    rescue
+      error ->
+        Logger.error("Error in generate_title", error: error)
+        {:error, error}
     end
   end
 end
