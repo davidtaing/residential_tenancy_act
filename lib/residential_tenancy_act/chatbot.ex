@@ -67,20 +67,24 @@ defmodule ResidentialTenancyAct.Chatbot do
 
     Logger.info("Chatbot: Token History Updated", token_history: token_history)
 
-    # Create prompt history
-    prompt_history =
-      PromptHistory
-      |> Ash.Changeset.for_create(
-        :create,
-        %{
-          message_id: last_message.id,
-          content: master_prompt
-        },
-        actor: current_user
-      )
-      |> Ash.create!()
+    # Create prompt history 10% of the time
+    random_number = :rand.uniform(100)
 
-    Logger.debug("Chatbot: Prompt History Created", prompt_history: prompt_history)
+    if random_number <= 10 do
+      prompt_history =
+        PromptHistory
+        |> Ash.Changeset.for_create(
+          :create,
+          %{
+            message_id: last_message.id,
+            content: master_prompt
+          },
+          actor: current_user
+        )
+        |> Ash.create!()
+
+      Logger.debug("Chatbot: Prompt History Created", prompt_history: prompt_history)
+    end
 
     # Create response message
     response_message =
