@@ -148,6 +148,18 @@ defmodule ResidentialTenancyActWeb.ChatLive do
   end
 
   @impl true
+  def handle_info({:generate_title, conversation_id, current_user}, socket) do
+    conversation = Chatbot.generate_title(conversation_id, current_user)
+
+    socket =
+      socket
+      |> assign(conversation: conversation)
+
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("send_message", %{"message" => message}, socket) do
     if String.trim(message) == "" do
       {:noreply, socket}
@@ -185,13 +197,13 @@ defmodule ResidentialTenancyActWeb.ChatLive do
         )
         |> Ash.create!()
 
-      # # Update conversation title if this is the first message
-      # if messages == [] do
-      #   send(
-      #     self(),
-      #     {:generate_title, user_message, socket.assigns.conversation_id, current_user}
-      #   )
-      # end
+      # Update conversation title if this is the first message
+      if messages == [] do
+        send(
+          self(),
+          {:generate_title, user_message, socket.assigns.conversation_id, current_user}
+        )
+      end
 
       messages = messages ++ [user_message]
 

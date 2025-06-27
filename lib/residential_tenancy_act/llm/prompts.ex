@@ -51,7 +51,7 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
     USER QUESTION:
     #{prompt}
 
-    Respond with only the title, no additional text or explanation.
+    Respond with the title in plain text only. Do not include any other formatting.
     """
   end
 

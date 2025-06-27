@@ -3,14 +3,16 @@ defmodule ResidentialTenancyAct.Chatbot do
   A module for interacting with the chatbot.
   """
 
+  require Ash.Query
   require Logger
 
   alias ResidentialTenancyAct.Acts.RTASections
-  alias ResidentialTenancyAct.Chat.{Messages, TokenHistory}
+  alias ResidentialTenancyAct.Chat.{Messages, TokenHistory, Conversations}
   alias ResidentialTenancyAct.ChatStateServer
   alias ResidentialTenancyAct.LLM
   alias ResidentialTenancyAct.LLM.Prompts
   alias ResidentialTenancyAct.Accounts.User
+  alias ResidentialTenancyAct.LLM.AWSNovaRequest.{Message, TextContent}
 
   @spec generate_response(pid(), list(Messages.t()), User.t(), map()) ::
           {:ok, %{message: Messages.t(), context: String.t(), response: Messages.t()}}
@@ -83,9 +85,12 @@ defmodule ResidentialTenancyAct.Chatbot do
 
     ChatStateServer.change_to_responding(chat_server_pid, response_message)
 
-    {:ok, %{message: last_message, context: context, response: response_message}}
+    Conversations.touch(last_message.conversation_id)
+
+    :ok
   end
 
+  @spec perform_rag_search(Messages.t()) :: String.t()
   def perform_rag_search(message) do
     text = message.content
     {:ok, embeddings, _token_count} = LLM.generate_embeddings(text)
@@ -94,7 +99,54 @@ defmodule ResidentialTenancyAct.Chatbot do
     Prompts.format_sections_context(sections)
   end
 
-  def get_conversation_title(_message) do
-    nil
+  @spec generate_title(String.t(), User.t()) :: Conversations.t()
+  def generate_title(conversation_id, current_user) do
+    message =
+      Messages
+      |> Ash.Query.new()
+      |> Ash.Query.filter(conversation_id: conversation_id)
+      |> Ash.Query.sort(created_at: :asc)
+      |> Ash.Query.limit(1)
+      |> Ash.read!(actor: current_user)
+      |> hd()
+
+    content = message.content
+      |> Prompts.build_title_prompt()
+
+    payload =
+      [
+        %Message{
+          role: :user,
+          content: [
+            %TextContent{text: content}
+          ]
+        }
+      ]
+
+
+    {:ok, %{text: response, usage: usage}} = LLM.generate_text_response(payload)
+
+    response = response |> String.replace("\"", "")
+
+    # Update token history
+    token_history = %{
+      conversation_id: conversation_id,
+      input_tokens: usage["inputTokens"],
+      output_tokens: usage["outputTokens"]
+    }
+
+    token_history =
+      TokenHistory
+      |> Ash.Changeset.for_create(:create, token_history, actor: current_user)
+      |> Ash.create!()
+
+    Logger.info("Chatbot: Token History Updated", token_history: token_history)
+
+    conversation = Conversations
+    |> Ash.get!(conversation_id, actor: current_user)
+    |> Ash.Changeset.for_update(:update, %{title: response}, actor: current_user)
+    |> Ash.update!()
+
+    conversation
   end
 end
