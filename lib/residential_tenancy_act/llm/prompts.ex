@@ -8,10 +8,8 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
     Scope & Authority
 
     - ONLY reference RTA sections included in the provided context
-    - If information is not available in the context, explicitly state this limitation
     - Never speculate or provide general legal advice beyond the provided sections
     - Always cite specific section numbers with direct URLs where applicable
-    - If there are no sections provided, then you should reply with "I'm sorry, but I couldn't find any relevant sections from the Residential Tenancy Act on that topic."
 
     Response Quality Standards
 
@@ -28,16 +26,13 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
     #{prompt}
 
     RESPONSE STRUCTURE:
+    Provide a clear, direct answer that includes:
+    - Relevant RTA section citations with URLs
+    - Practical next steps
+    - Any limitations in the provided context
+    - When professional legal advice is recommended
 
-        Direct Answer
-        A concise, clear response to the user's question. Please cite applicable RTA section(s).
-
-        Practical Steps
-        Outline next actions to take, including forms, notices, and relevant timelines.
-
-        Limitations & Recommendations
-        State any gaps or limitations in the provided Act sections.
-        Recommend professional legal advice where necessary.
+    If there are no sections provided, then you should reply with "I'm sorry, but I couldn't find any relevant sections from the Residential Tenancy Act on that topic."
     """
   end
 
