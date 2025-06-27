@@ -156,6 +156,7 @@
               rows="3"
               maxlength="1000"
               phx-hook="AutoResize"
+              phx-update="ignore"
             ></textarea>
             <button
               type="submit"
@@ -213,35 +214,6 @@
         }
       });
     });
-  });
-
-  // Auto-resize textarea
-  document.addEventListener('DOMContentLoaded', function() {
-    const textarea = document.querySelector('textarea[name="message"]');
-    if (textarea) {
-      const resizeTextarea = function() {
-        textarea.style.height = 'auto';
-        const maxHeight = window.innerHeight * 0.5; // Half screen height
-        const newHeight = Math.max(textarea.scrollHeight, 60); // Minimum 60px
-        textarea.style.height = Math.min(newHeight, maxHeight) + 'px';
-      };
-      
-      textarea.addEventListener('input', resizeTextarea);
-      textarea.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          // Let the form submit handle this
-          return;
-        }
-        // For all other keys, resize after a short delay to catch new lines
-        setTimeout(resizeTextarea, 0);
-      });
-      
-      // Handle window resize
-      window.addEventListener('resize', resizeTextarea);
-      
-      // Initial resize
-      resizeTextarea();
-    }
   });
 
   // Scroll to bottom when new messages arrive
