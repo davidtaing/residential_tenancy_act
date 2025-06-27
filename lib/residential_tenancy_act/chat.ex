@@ -5,5 +5,6 @@ defmodule ResidentialTenancyAct.Chat do
     resource ResidentialTenancyAct.Chat.Messages
     resource ResidentialTenancyAct.Chat.Conversations
     resource ResidentialTenancyAct.Chat.TokenHistory
+    resource ResidentialTenancyAct.Chat.PromptHistory
   end
 end

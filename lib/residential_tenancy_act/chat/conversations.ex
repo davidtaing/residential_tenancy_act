@@ -63,9 +63,10 @@ defmodule ResidentialTenancyAct.Chat.Conversations do
   end
 
   def touch(conversation_id) do
-    query = from c in __MODULE__,
-      where: c.id == ^conversation_id,
-      update: [set: [updated_at: fragment("CURRENT_TIMESTAMP")]]
+    query =
+      from c in __MODULE__,
+        where: c.id == ^conversation_id,
+        update: [set: [updated_at: fragment("CURRENT_TIMESTAMP")]]
 
     result = ResidentialTenancyAct.Repo.update_all(query, [])
 

@@ -7,7 +7,7 @@ defmodule ResidentialTenancyAct.Chatbot do
   require Logger
 
   alias ResidentialTenancyAct.Acts.RTASections
-  alias ResidentialTenancyAct.Chat.{Messages, TokenHistory, Conversations}
+  alias ResidentialTenancyAct.Chat.{Messages, TokenHistory, Conversations, PromptHistory}
   alias ResidentialTenancyAct.ChatStateServer
   alias ResidentialTenancyAct.LLM
   alias ResidentialTenancyAct.LLM.Prompts
@@ -67,6 +67,21 @@ defmodule ResidentialTenancyAct.Chatbot do
 
     Logger.info("Chatbot: Token History Updated", token_history: token_history)
 
+    # Create prompt history
+    prompt_history =
+      PromptHistory
+      |> Ash.Changeset.for_create(
+        :create,
+        %{
+          message_id: last_message.id,
+          content: master_prompt
+        },
+        actor: current_user
+      )
+      |> Ash.create!()
+
+    Logger.debug("Chatbot: Prompt History Created", prompt_history: prompt_history)
+
     # Create response message
     response_message =
       Messages
@@ -110,7 +125,8 @@ defmodule ResidentialTenancyAct.Chatbot do
       |> Ash.read!(actor: current_user)
       |> hd()
 
-    content = message.content
+    content =
+      message.content
       |> Prompts.build_title_prompt()
 
     payload =
@@ -122,7 +138,6 @@ defmodule ResidentialTenancyAct.Chatbot do
           ]
         }
       ]
-
 
     {:ok, %{text: response, usage: usage}} = LLM.generate_text_response(payload)
 
@@ -142,10 +157,11 @@ defmodule ResidentialTenancyAct.Chatbot do
 
     Logger.info("Chatbot: Token History Updated", token_history: token_history)
 
-    conversation = Conversations
-    |> Ash.get!(conversation_id, actor: current_user)
-    |> Ash.Changeset.for_update(:update, %{title: response}, actor: current_user)
-    |> Ash.update!()
+    conversation =
+      Conversations
+      |> Ash.get!(conversation_id, actor: current_user)
+      |> Ash.Changeset.for_update(:update, %{title: response}, actor: current_user)
+      |> Ash.update!()
 
     conversation
   end
