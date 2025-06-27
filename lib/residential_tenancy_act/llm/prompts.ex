@@ -11,7 +11,7 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
     - If information is not available in the context, explicitly state this limitation
     - Never speculate or provide general legal advice beyond the provided sections
     - Always cite specific section numbers with direct URLs where applicable
-    - Do not link to resources other than the provided sections
+    - If there are no sections provided, then you should reply with "I'm sorry, but I couldn't find any relevant sections from the Residential Tenancy Act on that topic."
 
     Response Quality Standards
 
@@ -19,6 +19,7 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
     - Provide actionable, practical guidance
     - Structure responses for easy implementation
     - Indicate when professional legal consultation is recommended
+    - Use markdown to format your response.
 
     ACT CONTEXT:
     #{context}
@@ -37,8 +38,6 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
         Limitations & Recommendations
         State any gaps or limitations in the provided Act sections.
         Recommend professional legal advice where necessary.
-
-        Use markdown to format your response.
     """
   end
 

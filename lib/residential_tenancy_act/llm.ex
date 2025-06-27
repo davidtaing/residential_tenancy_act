@@ -30,7 +30,7 @@ defmodule ResidentialTenancyAct.LLM do
             Map.put(metadata, :token_count, token_count)
           )
 
-          {:ok, embeddings}
+          {:ok, embeddings, token_count}
 
         {:ok, unexpected_response} ->
           Logger.error(
@@ -60,7 +60,7 @@ defmodule ResidentialTenancyAct.LLM do
 
     case response do
       {:ok,
-       %{"output" => %{"message" => %{"content" => [%{"text" => text}]}}, "usage" => usage} = res} ->
+       %{"output" => %{"message" => %{"content" => [%{"text" => text}]}}, "usage" => usage}} ->
         result = %{
           text: text,
           usage: usage

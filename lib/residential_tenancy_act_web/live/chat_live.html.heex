@@ -149,7 +149,6 @@
               id="chat-input"
               name="message"
               value={@current_message}
-              phx-keyup="update_message"
               phx-keydown="keydown"
               phx-ignore
               placeholder="Ask me about tenancy laws..."
@@ -175,21 +174,23 @@
             </button>
           </div>
         </form>
-        <div class="flex justify-between items-center mt-3 text-xs text-emerald-700">
-          <span>Press Enter or Ctrl Enter to send. Shift+Enter for new line.</span>
+        <div class="flex justify-end items-center mt-3 text-xs text-emerald-700">
           <span>{String.length(@current_message)}/1000</span>
         </div>
       </div>
     </div>
     
 <!-- Disclaimer -->
-    <div class="px-6 py-4 text-center bg-emerald-200 border-t border-emerald-300">
+    <div class="px-6 py-6 text-center bg-white border-t border-emerald-300">
       <div class="max-w-4xl mx-auto">
         <p class="text-xs leading-relaxed text-emerald-800">
           TenancyBot may make mistakes. Please double-check all responses and review the official links provided. For complex issues, consider seeking legal advice.
         </p>
       </div>
     </div>
+    
+<!-- Ko-fi Donation Bar -->
+    <div class="h-16 bg-white border-t border-emerald-300"></div>
   </div>
 </div>
 
@@ -251,4 +252,15 @@
     });
     observer.observe(chatMessages, { childList: true, subtree: true });
   }
+</script>
+
+<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script>
+  kofiWidgetOverlay.draw('teeang', {
+    'type': 'floating-chat',
+    'floating-chat.donateButton.text': 'Support Me',
+    'floating-chat.donateButton.background-color': '#f45d22', 
+    'floating-chat.donateButton.text-color': '#fff',
+    'floating-chat.donateButton.background-transparency': '1'
+  });
 </script>

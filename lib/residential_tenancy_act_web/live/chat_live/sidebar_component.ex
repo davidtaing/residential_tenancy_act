@@ -56,7 +56,7 @@ defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
           </button>
         </div>
       </div>
-      
+
     <!-- Conversation List -->
       <div class="flex-1 overflow-y-auto p-4 space-y-2">
         <%= if Enum.empty?(@conversations) do %>
@@ -82,9 +82,9 @@ defmodule ResidentialTenancyActWeb.ChatLive.SidebarComponent do
           </div>
         <% end %>
       </div>
-      
+
     <!-- Sidebar Footer -->
-      <div class="p-4 border-t border-emerald-800">
+      <div class="p-4 border-t border-emerald-800 pb-24">
         <a
           href="/chat"
           class="block w-full p-3 bg-emerald-700 hover:bg-emerald-600 rounded-lg transition-colors text-sm font-medium text-center"
