@@ -11,15 +11,27 @@ defmodule ResidentialTenancyActWeb.WelcomeMessageComponent do
           Ask me questions about your rights and obligations.
         </p>
         <div class="space-y-3 mb-8">
-          <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">
+          <button
+            phx-click="send_message"
+            phx-value-message="What are my rights as a tenant?"
+            class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900 hover:bg-emerald-400 transition-colors cursor-pointer"
+          >
             "What are my rights as a tenant?"
-          </div>
-          <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">
+          </button>
+          <button
+            phx-click="send_message"
+            phx-value-message="How much notice do I need to give?"
+            class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900 hover:bg-emerald-400 transition-colors cursor-pointer"
+          >
             "How much notice do I need to give?"
-          </div>
-          <div class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900">
+          </button>
+          <button
+            phx-click="send_message"
+            phx-value-message="What can I do about repairs?"
+            class="inline-block px-4 py-2 rounded-full text-sm bg-emerald-300 text-emerald-900 hover:bg-emerald-400 transition-colors cursor-pointer"
+          >
             "What can I do about repairs?"
-          </div>
+          </button>
         </div>
         <div class="p-4 rounded-lg bg-emerald-200 border border-emerald-300">
           <p class="text-sm text-emerald-800">
