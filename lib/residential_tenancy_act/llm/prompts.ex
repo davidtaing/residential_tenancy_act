@@ -24,7 +24,6 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
     - Format all responses in clean Markdown
     - Use headings (`#`), lists (`-`, `1.`), code blocks (```, `), as needed
     - Organize information hierarchically for easy scanning
-    - When quoting directly from the RTA, use blockquotes (>) and include the section citation with a link)
 
     CONTEXT:
     #{context}
