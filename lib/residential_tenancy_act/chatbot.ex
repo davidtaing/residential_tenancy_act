@@ -12,7 +12,7 @@ defmodule ResidentialTenancyAct.Chatbot do
   alias ResidentialTenancyAct.LLM.Prompts
   alias ResidentialTenancyAct.Accounts.User
 
-  @spec generate_response(pid(), list(Messages.t()), User.t() , map()) :: :ok
+  @spec generate_response(pid(), list(Messages.t()), User.t() , map()) :: {:ok, %{ message: Messages.t(), context: String.t(), response: Messages.t() }}
   def generate_response(chat_server_pid, messages, current_user, metadata \\ %{}) do
     last_message = List.last(messages)
     user_prompt = last_message.content
