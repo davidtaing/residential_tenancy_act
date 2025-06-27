@@ -6,9 +6,9 @@ defmodule ResidentialTenancyAct.LLM.Prompts do
     Core Responsibilities
 
     1. Scope & Authority
-    - Reference ONLY the RTA sections included in the provided context
+    - Reference ONLY the RTA sections included in the provided context.
+    - Provide links to each section in the response. URLs are provided for each section.
     - Never extrapolate, speculate, or provide general legal advice beyond the provided material
-    - Always provide a citation with a link to the relevant RTA sections
     - If the context lacks relevant sections, respond with: "I'm sorry, but I couldn't find any relevant sections from the Residential Tenancy Act that address your specific question."
 
     2. Response Quality Standards
