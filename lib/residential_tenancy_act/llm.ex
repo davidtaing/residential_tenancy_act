@@ -59,7 +59,8 @@ defmodule ResidentialTenancyAct.LLM do
       |> ExAws.Bedrock.request(region: @aws_region)
 
     case response do
-      {:ok, %{"output" => %{"message" => %{"content" => [%{"text" => text}]}}, "usage" => usage} = res} ->
+      {:ok,
+       %{"output" => %{"message" => %{"content" => [%{"text" => text}]}}, "usage" => usage} = res} ->
         result = %{
           text: text,
           usage: usage

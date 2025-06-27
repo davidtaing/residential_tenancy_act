@@ -23,8 +23,7 @@ defmodule ResidentialTenancyActWeb.WelcomeMessageComponent do
         </div>
         <div class="p-4 rounded-lg bg-emerald-200 border border-emerald-300">
           <p class="text-sm text-emerald-800">
-            <strong>Note:</strong>
-            Currently supporting NSW only. Other states coming soon!
+            <strong>Note:</strong> Currently supporting NSW only. Other states coming soon!
           </p>
         </div>
       </div>

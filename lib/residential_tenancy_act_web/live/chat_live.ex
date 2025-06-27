@@ -212,7 +212,6 @@ defmodule ResidentialTenancyActWeb.ChatLive do
     end
   end
 
-
   @impl true
   def handle_event("change_state", %{"state" => state}, socket) do
     {:noreply, assign(socket, selected_state: state)}
@@ -334,7 +333,7 @@ defmodule ResidentialTenancyActWeb.ChatLive do
                 %{
                   conversation_id: conversation_id,
                   input_tokens: usage["inputTokenCount"],
-                  output_tokens: usage["outputTokenCount"],
+                  output_tokens: usage["outputTokenCount"]
                 },
                 actor: current_user
               )
@@ -402,10 +401,11 @@ defmodule ResidentialTenancyActWeb.ChatLive do
             %{
               conversation_id: conversation_id,
               input_tokens: title.usage["inputTokenCount"],
-              output_tokens: title.usage["outputTokenCount"],
+              output_tokens: title.usage["outputTokenCount"]
             }
           )
           |> Ash.create!()
+
           {:ok, title}
 
         {:error, error} ->

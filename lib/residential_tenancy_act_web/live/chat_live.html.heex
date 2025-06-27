@@ -73,7 +73,10 @@
     >
       <div class="max-w-4xl mx-auto">
         <%= if @messages == [] do %>
-          <.live_component module={ResidentialTenancyActWeb.WelcomeMessageComponent} id="welcome-message" />
+          <.live_component
+            module={ResidentialTenancyActWeb.WelcomeMessageComponent}
+            id="welcome-message"
+          />
         <% else %>
           <%= for message <- @messages do %>
             <%= if message.role == :user do %>
