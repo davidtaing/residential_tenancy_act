@@ -3,6 +3,8 @@ defmodule ResidentialTenancyAct.ChatState do
   Struct representing the internal state of a chat session.
   """
 
+  alias ResidentialTenancyAct.Chat.Messages
+
   @enforce_keys [:client]
 
   defstruct client: nil,
@@ -18,6 +20,6 @@ defmodule ResidentialTenancyAct.ChatState do
           state: state_type(),
           prompt: String.t() | nil,
           context: String.t() | nil,
-          response: String.t() | nil
+          response: Messages.t() | nil
         }
 end

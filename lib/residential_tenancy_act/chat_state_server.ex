@@ -1,6 +1,8 @@
 defmodule ResidentialTenancyAct.ChatStateServer do
   use GenServer
+
   alias ResidentialTenancyAct.ChatState
+  alias ResidentialTenancyAct.Chat.Messages
 
   # -- Public API --
 
@@ -77,7 +79,7 @@ defmodule ResidentialTenancyAct.ChatStateServer do
     end
   end
 
-  def handle_cast({:change_state, :responding, response}, %ChatState{state: old} = s) do
+  def handle_cast({:change_state, :responding, %Messages{}=response}, %ChatState{state: old} = s) do
     if old != :responding do
       send(self(), {:state_transition, :responding})
       {:noreply, %ChatState{s | state: :responding, response: response}}
