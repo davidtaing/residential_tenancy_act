@@ -2,6 +2,8 @@
 
 An intelligent chatbot application that helps users navigate and understand Residential Tenancy Act information through natural language queries. Built with Elixir Phoenix LiveView and powered by AI.
 
+https://residential-tenancy-act.fly.dev/
+
 ## Features
 
 - **AI-Powered Chat Interface** - Ask questions about residential tenancy laws in natural language
